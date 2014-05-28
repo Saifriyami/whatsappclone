@@ -307,7 +307,7 @@ public class Messenger {
          esql.executeUpdate("INSERT INTO USER_LIST(list_type) VALUES ('contact')");
 	 int contact_id = esql.getCurrSeqVal("user_list_list_id_seq");
          
-	 String query = String.format("INSERT INTO USR VALUES ('%s','%s','%s',%s,%s)", phone, login, password, block_id, contact_id);
+	 String query = String.format("INSERT INTO USR (phoneNum, login, password, block_list, contact_list) VALUES ('%s','%s','%s',%s,%s)", phone, login, password, block_id, contact_id);
 
          esql.executeUpdate(query);
          System.out.println ("User successfully created!");
