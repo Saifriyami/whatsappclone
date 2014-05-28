@@ -339,9 +339,19 @@ public class Messenger {
    }//end
 
    public static void AddToContact(Messenger esql){
-      // Your code goes here.
-      // ...
-      // ...
+      // query for the contact_list int
+	String query = String.format("SELECT Usr.contact_list FROM Usr WHERE  login = '%s'" , esql.username);
+	int contact_int = esql.executeQuery(query);
+	// TODO check for empty list
+	if( contact_int == null)
+	{
+		//create the list
+		String query2 = String.format("INSERT INTO USER_LIST( '%s')", "contact");
+		esql.executeUpdate(query);
+		contact_int = esql.executeQuery(query);
+	}
+	// 
+	
    }//end
 
    public static void ListContacts(Messenger esql){
