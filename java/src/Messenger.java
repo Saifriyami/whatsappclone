@@ -21,6 +21,82 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.utils.List;
+import java.utils.ArrayList;
+
+/**
+ * This Class the info needed for the current autho-user
+ */
+public class aUser{
+	private String login = null;
+	private String password = null;
+	private String phoneNum = null;
+	private String status = null;
+	private int block_list = null;
+	private int contact_list = null;
+	
+	
+	public aUser(String login )
+	{
+		
+		this.login = login;
+		
+	}
+	
+	public String getlogin()
+	{
+		return login
+	}
+
+	public String getpassword(Messenger esql){
+		String password
+		if(this.password != null)
+			return this.password;
+		
+		
+		return login
+	}	
+
+	public String getphoneNum(Messenger esql){
+		return login
+	}	
+
+	public String getstatus(Messenger esql){
+		return login
+	}	
+
+	public String getblock_list(Messenger esql){
+		return login
+	}	
+
+	public String getcontact_list(Messenger esql){
+		return login
+	}	
+
+	public String setpassword(Messenger esql){
+		return login
+	}	
+
+	public String setphoneNum(Messenger esql){
+		return login
+	}	
+
+	public String setstatus(Messenger esql){
+		return login
+	}	
+
+	public String setblock_list(Messenger esql){
+		return login
+	}	
+
+	public String setcontact_list(Messenger esql){
+		return login
+	}	
+
+
+	
+}
+
 
 /**
  * This class defines a simple embedded SQL utility class that is designed to
@@ -123,6 +199,34 @@ public class Messenger {
       }//end while
       stmt.close ();
       return rowCount;
+   }//end executeQuery
+
+
+public ArrayList<List<String>> executeQueryResult (String query) throws SQLException {
+      // creates a statement object
+      Statement stmt = this._connection.createStatement ();
+
+      // issues the query instruction
+      ResultSet rs = stmt.executeQuery (query);
+
+      /*
+       ** obtains the metadata object for the returned result set.  The metadata
+       ** contains row and column info.
+       */
+      ResultSetMetaData rsmd = rs.getMetaData ();
+      int numCol = rsmd.getColumnCount ();
+		ArrayList<List<String>> result = new ArrayList<List<String>>();
+
+      // iterates through the result set and output them to standard out.
+      while (rs.next()){
+
+				List<String> record = new List<String>();
+	         for (int i=1; i<=numCol; ++i)
+					record.add(rs.getString(i));	
+         result.add(record);
+      }//end while
+      stmt.close ();
+      return result;
    }//end executeQuery
 
    /**
@@ -342,7 +446,7 @@ public class Messenger {
       // query for the contact_list int
 	String query = String.format("SELECT Usr.contact_list FROM Usr WHERE  login = '%s'" , esql.username);
 	int contact_int = esql.executeQuery(query);
-	// TODO check for empty list
+	//  check for empty list
 	if( contact_int == null)
 	{
 		//create the list
