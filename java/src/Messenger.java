@@ -23,78 +23,31 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.utils.List;
 import java.utils.ArrayList;
+import java.util.ListIterator;
 
 /**
  * This Class the info needed for the current autho-user
  */
 public class aUser{
-	private String login = null;
-	private String password = null;
-	private String phoneNum = null;
-	private String status = null;
-	private int block_list = null;
-	private int contact_list = null;
+	String login = null;
+	String password = null;
+	String phoneNum = null;
+	String status = null;
+	int block_list = null;
+	int contact_list = null;
 	
-	
-	public aUser(String login )
-	{
-		
+	public  aUser(Messenger esql, String login){
 		this.login = login;
-		
+		String query = String.format("SELECT * FROM Usr WHERE  login = '%s'" , login);
+		ArrayList<List<String>> al = esql.executeQueryResult(query);
+		// TODO double check 
+		//ListIterator li = new al.ListIterator();
+		this.password = al.get(1);
+		this.phoneNum = al.get(2);
+		this.status = al.get(3);
+		this.block_list = (int)al.get(4);
+		this.contact_list = (int) al.get(5);
 	}
-	
-	public String getlogin()
-	{
-		return login
-	}
-
-	public String getpassword(Messenger esql){
-		String password
-		if(this.password != null)
-			return this.password;
-		
-		
-		return login
-	}	
-
-	public String getphoneNum(Messenger esql){
-		return login
-	}	
-
-	public String getstatus(Messenger esql){
-		return login
-	}	
-
-	public String getblock_list(Messenger esql){
-		return login
-	}	
-
-	public String getcontact_list(Messenger esql){
-		return login
-	}	
-
-	public String setpassword(Messenger esql){
-		return login
-	}	
-
-	public String setphoneNum(Messenger esql){
-		return login
-	}	
-
-	public String setstatus(Messenger esql){
-		return login
-	}	
-
-	public String setblock_list(Messenger esql){
-		return login
-	}	
-
-	public String setcontact_list(Messenger esql){
-		return login
-	}	
-
-
-	
 }
 
 
