@@ -395,10 +395,10 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 			return;
 		}
 	//check if there is a relation
-		String query = String.format("SELECT USER_LIST_CONTAINS.list_id FROM USER_LIST_CONTAINS WHERE  login = '%s' and contact_list = '%s'" ,logintoadd,  au.contact_list);
+		String query = String.format("select * from USER_LIST_CONTAINS where  list_member = '%s' AND list_id = '%s'" ,logintoadd,  au.contact_list);
 		int contact_int = esql.executeQuery(query);
 		//  check for empty list
-		if( contact_int == 1)
+		if( contact_int != 0)
 		{
 			System.out.println("you are already pals");
 			return;
@@ -409,9 +409,12 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 			String query2 = String.format("INSERT INTO USER_LIST_CONTAINS( '%s', '%s')", au.contact_list, logintoadd);
 			esql.executeUpdate(query);
 			
+			System.out.println("Your are now friends with " + logintoadd);
+			
 		}
 	} catch( Exception e){
 		System.err.println (e.getMessage() );
+		System.out.println("err");
 		return;
 	}
 	// 
