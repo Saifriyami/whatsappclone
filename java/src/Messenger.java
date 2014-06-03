@@ -21,34 +21,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.utils.List;
-import java.utils.ArrayList;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.ListIterator;
 
-/**
- * This Class the info needed for the current autho-user
- */
-public class aUser{
-	String login = null;
-	String password = null;
-	String phoneNum = null;
-	String status = null;
-	int block_list = null;
-	int contact_list = null;
-	
-	public  aUser(Messenger esql, String login){
-		this.login = login;
-		String query = String.format("SELECT * FROM Usr WHERE  login = '%s'" , login);
-		ArrayList<List<String>> al = esql.executeQueryResult(query);
-		// TODO double check 
-		//ListIterator li = new al.ListIterator();
-		this.password = al.get(1);
-		this.phoneNum = al.get(2);
-		this.status = al.get(3);
-		this.block_list = (int)al.get(4);
-		this.contact_list = (int) al.get(5);
-	}
-}
 
 
 /**
@@ -155,7 +131,7 @@ public class Messenger {
    }//end executeQuery
 
 
-public ArrayList<List<String>> executeQueryResult (String query) throws SQLException {
+public List<List<String>> executeQueryResult (String query) throws SQLException {
       // creates a statement object
       Statement stmt = this._connection.createStatement ();
 
@@ -168,14 +144,14 @@ public ArrayList<List<String>> executeQueryResult (String query) throws SQLExcep
        */
       ResultSetMetaData rsmd = rs.getMetaData ();
       int numCol = rsmd.getColumnCount ();
-		ArrayList<List<String>> result = new ArrayList<List<String>>();
+      
 
+      List<List<String>> result = new ArrayList<List<String>>();
       // iterates through the result set and output them to standard out.
       while (rs.next()){
-
-				List<String> record = new List<String>();
+		List<String> record = new ArrayList<String>();
 	         for (int i=1; i<=numCol; ++i)
-					record.add(rs.getString(i));	
+				record.add(rs.getString(i));	
          result.add(record);
       }//end while
       stmt.close ();
@@ -274,9 +250,17 @@ public ArrayList<List<String>> executeQueryResult (String query) throws SQLExcep
             System.out.println("2. Log in");
             System.out.println("9. < EXIT");
             String authorisedUser = null;
+			aUser au = null;
             switch (readChoice()){
                case 1: CreateUser(esql); break;
-               case 2: authorisedUser = LogIn(esql); break;
+               case 2: authorisedUser = LogIn(esql);
+						if(authorisedUser != null) 
+						{
+
+							au = new aUser(esql, authorisedUser);
+						}
+
+						 break;
                case 9: keepon = false; break;
                default : System.out.println("Unrecognized choice!"); break;
             }//end switch
@@ -292,7 +276,7 @@ public ArrayList<List<String>> executeQueryResult (String query) throws SQLExcep
                 System.out.println(".........................");
                 System.out.println("9. Log out");
                 switch (readChoice()){
-                   case 1: AddToContact(esql); break;
+                   case 1: AddToContact(esql, au); break;
                    case 2: ListContacts(esql); break;
                    case 3: NewMessage(esql); break;
                    case 4: ReadNotifications(esql); break;
@@ -395,17 +379,40 @@ public ArrayList<List<String>> executeQueryResult (String query) throws SQLExcep
       }
    }//end
 
-   public static void AddToContact(Messenger esql){
-      // query for the contact_list int
-	String query = String.format("SELECT Usr.contact_list FROM Usr WHERE  login = '%s'" , esql.username);
-	int contact_int = esql.executeQuery(query);
-	//  check for empty list
-	if( contact_int == null)
-	{
-		//create the list
-		String query2 = String.format("INSERT INTO USER_LIST( '%s')", "contact");
-		esql.executeUpdate(query);
-		contact_int = esql.executeQuery(query);
+   public static void AddToContact(Messenger esql, aUser au){
+
+	try{
+      // get contact
+         System.out.print("\tEnter user login to add: ");
+         String logintoadd = in.readLine();
+
+	//check if new contact exists
+		String query1 = String.format("Select USR.login  From USR Where login = '%s'" , logintoadd);
+		int numR = esql.executeQuery(query1);
+		if( numR == 0)
+		{
+			System.out.println("User does not exist");
+			return;
+		}
+	//check if there is a relation
+		String query = String.format("SELECT USER_LIST_CONTAINS.list_id FROM USER_LIST_CONTAINS WHERE  login = '%s' and contact_list = '%s'" ,logintoadd,  au.contact_list);
+		int contact_int = esql.executeQuery(query);
+		//  check for empty list
+		if( contact_int == 1)
+		{
+			System.out.println("you are already pals");
+			return;
+		}
+		else
+		{
+			//create the list
+			String query2 = String.format("INSERT INTO USER_LIST_CONTAINS( '%s', '%s')", au.contact_list, logintoadd);
+			esql.executeUpdate(query);
+			
+		}
+	} catch( Exception e){
+		System.err.println (e.getMessage() );
+		return;
 	}
 	// 
 	
