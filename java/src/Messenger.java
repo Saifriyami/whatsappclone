@@ -273,13 +273,21 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                 System.out.println("2. Browse contact list");
                 System.out.println("3. Write a new message");
                 System.out.println("4. Read notification list");
+		System.out.println("5. Delete from contact list");
+		System.out.println("6. Add to block list");
+		System.out.println("7. Delete from block list");
+		System.out.println("8. Browse block list");
                 System.out.println(".........................");
                 System.out.println("9. Log out");
                 switch (readChoice()){
                    case 1: AddToContact(esql, au); break;
-                   case 2: ListContacts(esql); break;
+                   case 2: ListContacts(esql, au); break;
                    case 3: NewMessage(esql); break;
                    case 4: ReadNotifications(esql); break;
+		   case 5: DeleteFromContact(esql, au); break;
+		   case 6: AddToBlock(esql, au); break;
+		   case 7: DeleteFromBlock(esql, au); break;
+		   case 8: ListBlocks(esql, au); break;
                    case 9: usermenu = false; break;
                    default : System.out.println("Unrecognized choice!"); break;
                 }
@@ -385,6 +393,12 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
       // get contact
          System.out.print("\tEnter user login to add: ");
          String logintoadd = in.readLine();
+	
+	if(logintoadd.equals(au.login))
+	{
+		System.out.println("You cannot add yourself as a contact");
+		return;
+	}
 
 	//check if new contact exists
 		String query1 = String.format("Select USR.login  From USR Where login = '%s'" , logintoadd);
@@ -395,7 +409,7 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 			return;
 		}
 	//check if there is a relation
-		String query = String.format("select * from USER_LIST_CONTAINS where  list_member = '%s' AND list_id = '%s'" ,logintoadd,  au.contact_list);
+		String query = String.format("Select * from USER_LIST_CONTAINS where  list_member = '%s' AND list_id = '%s'" ,logintoadd,  au.contact_list);
 		int contact_int = esql.executeQuery(query);
 		//  check for empty list
 		if( contact_int != 0)
@@ -406,43 +420,212 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 		else
 		{
 			//create the list
-			String query2 = String.format("INSERT INTO USER_LIST_CONTAINS( '%s', '%s')", au.contact_list, logintoadd);
-			esql.executeUpdate(query);
+			String query2 = String.format("INSERT INTO USER_LIST_CONTAINS(list_id, list_member) VALUES( '%s', '%s')", au.contact_list, logintoadd);
+			esql.executeUpdate(query2);
 			
-			System.out.println("Your are now friends with " + logintoadd);
+			System.out.println("You are now friends with " + logintoadd);
 			
 		}
 	} catch( Exception e){
 		System.err.println (e.getMessage() );
-		System.out.println("err");
 		return;
 	}
 	// 
 	
    }//end
 
-   public static void ListContacts(Messenger esql){
-      // Your code goes here.
-      // ...
-      // ...
+   public static void ListContacts(Messenger esql, aUser au ){
+	try{
+	String query = String.format("select u.list_member , USR.status  from USER_LIST_CONTAINS u, USR where u.list_id = '%s' and USR.login = u.list_member  " , au.contact_list);
+	List< List<String>> contact_members = esql.executeQueryResult(query);
+	if( contact_members.size()  <= 0)
+	{
+		System.out.println("contact list is empty ");
+		return;
+	}
+	System.out.println("------------------");
+
+	for( int i = 0 ; i < contact_members.size() ; i++)
+	{
+		System.out.println(contact_members.get(i).get(0));
+		if(contact_members.get(i).get(1) != null)
+		{
+			System.out.println( "Status: " + contact_members.get(i).get(1));
+		}
+		System.out.println("------------------");
+		
+	}
+	} catch (Exception e)
+	{
+		System.err.println(e.getMessage());
+	}
+
    }//end
 
    public static void NewMessage(Messenger esql){
-      // Your code goes here.
-      // ...
-      // ...
+     	try{
+	}catch (Exception e)
+	{
+		System.err.println(e.getMessage());
+	}
+
    }//end 
 
    public static void ReadNotifications(Messenger esql){
-      // Your code goes here.
-      // ...
-      // ...
+     	try{
+	}catch (Exception e)
+	{
+		System.err.println(e.getMessage());
+	}
+ 
    }//end
 
-   public static void Query6(Messenger esql){
-      // Your code goes here.
-      // ...
-      // ...
+   public static void DeleteFromContact(Messenger esql, aUser au){
+    	try{
+	        System.out.print("\tEnter user login to delete: ");
+        	String logintodelete = in.readLine();
+
+		String query = String.format("select * from USER_LIST_CONTAINS where list_member ='%s' and list_id = '%s' ",logintodelete, au.contact_list );
+		int numR = esql.executeQuery(query);
+		if( numR == 0)
+		{
+			System.out.println(logintodelete + " is not on your contact list");
+			return;
+			
+		}
+		else{
+			String update = String.format("Delete from USER_LIST_CONTAINS where list_member = '%s' and list_id = '%s'",logintodelete, au.contact_list);
+			esql.executeUpdate(update);
+			System.out.println(logintodelete + " is now deleted from contacts");
+			return;
+		}
+		
+	}catch (Exception e)
+	{
+		System.err.println(e.getMessage());
+	}
+ 
    }//end Query6
+
+   public static void AddToBlock(Messenger esql, aUser au){
+     	try{
+	// get contact
+         System.out.print("\tEnter user login to block: ");
+         String logintoblock = in.readLine();
+	
+	if(logintoblock.equals(au.login))
+	{
+		System.out.println("You cannot block yourself as a contact");
+		return;
+	}
+
+	//check if new contact exists
+		String query1 = String.format("Select USR.login  From USR Where login = '%s'" , logintoblock);
+		int numR = esql.executeQuery(query1);
+		if( numR == 0)
+		{
+			System.out.println("User does not exist");
+			return;
+		}
+	//check if there is a relation
+		String query = String.format("Select * from USER_LIST_CONTAINS where  list_member = '%s' AND list_id = '%s'" ,logintoblock,  au.block_list);
+		int block_int = esql.executeQuery(query);
+		//  check for empty list
+		if( block_int != 0)
+		{
+			System.out.println(logintoblock + " is already blocked");
+			return;
+		}
+		else
+		{
+			String query3 = String.format("select * from USER_LIST_CONTAINS where list_member ='%s' and list_id = '%s' ",logintoblock, au.contact_list );
+			int numR2 = esql.executeQuery(query3);
+			if( numR2 == 1)
+			{
+				System.out.println(logintoblock + " is on your contact list");
+				System.out.println("They will be deleted from contact list if you do block");
+				System.out.println("are you sure? (y/n)");
+				String ans = in.readLine();
+				if( ans.equals("n"))
+				{
+					return;
+				}
+			
+				else{
+				String update = String.format("Delete from USER_LIST_CONTAINS where list_member = '%s' and list_id = '%s'",logintoblock, au.contact_list);
+				esql.executeUpdate(update);
+				System.out.println(logintoblock + " is now deleted from contacts");
+				return;
+				}
+			}
+
+///////
+			//create the list
+			String query2 = String.format("INSERT INTO USER_LIST_CONTAINS(list_id, list_member) VALUES( '%s', '%s')", au.block_list, logintoblock);
+			esql.executeUpdate(query2);
+			
+			System.out.println(  logintoblock + " is now blocked");
+		}
+
+		
+	}catch (Exception e)
+	{
+		System.err.println(e.getMessage());
+	}
+ 
+   }//end
+
+ public static void DeleteFromBlock(Messenger esql, aUser au){
+    	try{
+	        System.out.print("\tEnter user login to unblock: ");
+        	String logintounblock = in.readLine();
+
+		String query = String.format("select * from USER_LIST_CONTAINS where list_member ='%s' and list_id = '%s' ",logintounblock, au.block_list );
+		int numR = esql.executeQuery(query);
+		if( numR == 0)
+		{
+			System.out.println(logintounblock + " is not on your block list");
+			return;
+			
+		}
+		else{
+			String update = String.format("Delete from USER_LIST_CONTAINS where list_member = '%s' and list_id = '%s'",logintounblock, au.block_list);
+			esql.executeUpdate(update);
+			System.out.println(logintounblock + " is now deleted from blocked");
+			return;
+		}
+		
+	}catch (Exception e)
+	{
+		System.err.println(e.getMessage());
+	}
+ 
+   }//end Query6
+
+public static void ListBlocks(Messenger esql, aUser au ){
+	try{
+	String query = String.format("select u.list_member   from USER_LIST_CONTAINS u, USR where u.list_id = '%s' and USR.login = u.list_member  " , au.block_list);
+	List< List<String>> contact_members = esql.executeQueryResult(query);
+	if( contact_members.size()  <= 0)
+	{
+		System.out.println("block list is empty ");
+		return;
+	}
+	System.out.println("------------------");
+
+	for( int i = 0 ; i < contact_members.size() ; i++)
+	{
+		System.out.println(contact_members.get(i).get(0));
+		System.out.println("------------------");
+		
+	}
+	} catch (Exception e)
+	{
+		System.err.println(e.getMessage());
+	}
+
+   }//end
+
+
 
 }//end Messenger
