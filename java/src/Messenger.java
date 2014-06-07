@@ -409,6 +409,7 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 			return;
 		}
 	//check if there is a relation
+    //check if the loginToAdd is already in the contact list
 		String query = String.format("Select * from USER_LIST_CONTAINS where  list_member = '%s' AND list_id = '%s'" ,logintoadd,  au.contact_list);
 		int contact_int = esql.executeQuery(query);
 		//  check for empty list
