@@ -419,6 +419,34 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 		}
 		else
 		{
+			String query3 = String.format("select * from USER_LIST_CONTAINS where list_member ='%s' and list_id = '%s' ",logintoadd, au.block_list );
+			int numR2 = esql.executeQuery(query3);
+			if( numR2 == 1)
+			{
+				System.out.println(logintoadd + " is on your block list");
+				System.out.println("They will be deleted from block list if you do add");
+				System.out.println("are you sure? (y/n)");
+				String ans = in.readLine();
+				while(!ans.equals("n") && !ans.equals("y") )
+				{
+					System.out.println("Error: invalid answer. (y/n) ? ");
+					ans = in.readLine();
+				}
+				if( ans.equals("n"))
+				{
+					return;
+				}
+
+				else{
+				String update = String.format("Delete from USER_LIST_CONTAINS where list_member = '%s' and list_id = '%s'",logintoadd, au.block_list);
+				esql.executeUpdate(update);
+				System.out.println(logintoadd + " is now deleted from block list");
+				}
+			}
+
+
+/*-----------------------------------------------*/
+			
 			//create the list
 			String query2 = String.format("INSERT INTO USER_LIST_CONTAINS(list_id, list_member) VALUES( '%s', '%s')", au.contact_list, logintoadd);
 			esql.executeUpdate(query2);
@@ -440,7 +468,7 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 	List< List<String>> contact_members = esql.executeQueryResult(query);
 	if( contact_members.size()  <= 0)
 	{
-		System.out.println("contact list is empty ");
+		System.out.println("\ncontact list is empty\n");
 		return;
 	}
 	System.out.println("------------------");
@@ -519,12 +547,12 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 		return;
 	}
 
-	//check if new contact exists
+	//check if contact exists
 		String query1 = String.format("Select USR.login  From USR Where login = '%s'" , logintoblock);
 		int numR = esql.executeQuery(query1);
 		if( numR == 0)
 		{
-			System.out.println("User does not exist");
+			System.out.println(logintoblock + " does not exist");
 			return;
 		}
 	//check if there is a relation
@@ -546,16 +574,20 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 				System.out.println("They will be deleted from contact list if you do block");
 				System.out.println("are you sure? (y/n)");
 				String ans = in.readLine();
+				while(!ans.equals("n") && !ans.equals("y") )
+				{
+					System.out.println("Error: invalid answer. (y/n) ? ");
+					ans = in.readLine();
+				}
 				if( ans.equals("n"))
 				{
 					return;
 				}
-			
+
 				else{
 				String update = String.format("Delete from USER_LIST_CONTAINS where list_member = '%s' and list_id = '%s'",logintoblock, au.contact_list);
 				esql.executeUpdate(update);
 				System.out.println(logintoblock + " is now deleted from contacts");
-				return;
 				}
 			}
 
@@ -608,7 +640,7 @@ public static void ListBlocks(Messenger esql, aUser au ){
 	List< List<String>> contact_members = esql.executeQueryResult(query);
 	if( contact_members.size()  <= 0)
 	{
-		System.out.println("block list is empty ");
+		System.out.println("\nblock list is empty\n ");
 		return;
 	}
 	System.out.println("------------------");
