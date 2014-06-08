@@ -296,6 +296,7 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                             String subTitle1 = "\tNotifications List\n\t";
                             System.out.print(subTitle1);
                             System.out.println("CALL ReadNotifications(esql, au) ");
+							ReadNotifications(esql, au);
                             break;
                         case 2: //viewing chats
                              /*  
@@ -353,6 +354,7 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                                 System.out.print(subTitle2);
                                 printDashes(subTitle2.length());
                                 //TODO: BEFORE OUTPUTTING OPTIONS, PRINT LIST OF CHATS IN CHRONOLOGICAL ORDER BASED ON UPDATE DATE
+								printChats(esql, au);
                                 System.out.println("\n\t1. Select a Chat");
                                 System.out.println("\t2. New Chat");
                                 System.out.println("\t3. Delete Chat");
@@ -496,65 +498,68 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                         case 4: //settings
                             String subTitle4 = "\tSettings";
                             System.out.println(subTitle4 + "\n\t");
+							System.out.print("\t");
                             printDashes(subTitle4.length());
                             
                             boolean settings = true;
                             while(settings)
                             {
+								System.out.println("\n\t1. edit profile");
+								System.out.println("\t2. manage contacts");
+								System.out.println("\t3. delete account");
+								System.out.println("\t9. back to main menu");
+		
                                 switch(readChoice())
                                 {
                                     case 1: //edit profile
                                         break;
                                     case 2: //manage contacts
-										switch(readChoice())
-										{
-											case 1: //managing contacts
-												//print menu to console
-												boolean manageContacts = true;
-												String subTitle1 = "\tManaging Contacts";
-												while(manageContacts)
+											//print menu to console
+											boolean manageContacts = true;
+											String subTitlex = "\t\tManaging Contacts";
+											while(manageContacts)
+											{
+												System.out.println(subTitlex);
+												System.out.print("\t\t");
+												printDashes(subTitlex.length());
+												System.out.println();
+												System.out.println("\t\t1. Add to contact list");
+												System.out.println("\t\t2. Browse contact list");
+												System.out.println("\t\t3. Delete from contact list");
+												System.out.println("\t\t4. Add to block list");
+												System.out.println("\t\t5. Delete from block list");
+												System.out.println("\t\t6. Browse block list");
+												System.out.println("\t\t9. Return to Main Menu");
+												//determine user's actions                
+												switch(readChoice())
 												{
-													System.out.println(subTitle1);
-													System.out.print("\t");
-													printDashes(subTitle1.length());
-													System.out.println();
-													System.out.println("\t1. Add to contact list");
-													System.out.println("\t2. Browse contact list");
-													System.out.println("\t3. Delete from contact list");
-													System.out.println("\t4. Add to block list");
-													System.out.println("\t5. Delete from block list");
-													System.out.println("\t6. Browse block list");
-													System.out.println("\t9. Return to Main Menu");
-													//determine user's actions                
-													switch(readChoice())
-													{
-														case 1: 
-															AddToContact(esql, au);
-															break;
-														case 2:
-															ListContacts(esql, au);
-															break;
-														case 3:
-															DeleteFromContact(esql, au);
-															break;
-														case 4:
-															AddToBlock(esql, au);
-															break;
-														case 5:
-															DeleteFromBlock(esql, au);
-															break;
-														case 6:
-															ListBlocks(esql, au);
-															break;
-														case 9:
-															manageContacts = false;
-															break;
-														default:
-															System.out.println("Unrecognized choice!");
-															break;
+													case 1: 
+														AddToContact(esql, au);
+														break;
+													case 2:
+														ListContacts(esql, au);
+														break;
+													case 3:
+														DeleteFromContact(esql, au);
+														break;
+													case 4:
+														AddToBlock(esql, au);
+														break;
+													case 5:
+														DeleteFromBlock(esql, au);
+														break;
+													case 6:
+														ListBlocks(esql, au);
+														break;
+													case 9:
+														manageContacts = false;
+														break;
+													default:
+														System.out.println("Unrecognized choice!");
+														break;
 													} //end manageContacts switch
 												} //end manageContacts while
-                                        break;
+											break;
                                     case 3: //delete profile
                                         break;
                                     case 4: 
@@ -568,6 +573,7 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                                         break;
                                     default:
                                         System.out.println("\t\tUnrecognized choice!");
+						
 
                                 }//end settings switch
                             } //end settings while
@@ -599,6 +605,7 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
       }//end try
    }//end main
 
+           
 
 /*============================================================*/
 /*              START OF FUNCTION DEFINITIONS                 *
@@ -852,8 +859,54 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
     	}
    }//end NewMessage
 
-   public static void ReadNotifications(Messenger esql){
+   public static void printChats(Messenger esql, aUser au){
+        try{
+			// Get all the chats user has membership of
+				String c_time = String.format("select * from (select m.chat_id, MAX(m.msg_timestamp) as msg_timestamp from MESSAGE m,(select chat_id from CHAT_LIST where member = '%s') as c where c.chat_id = m.chat_id group by m.chat_id ) as id_t order by id_t.msg_timestamp", au.login);  
+ 
+	    	List< List<String >> temp = esql.executeQueryResult(c_time);
+			System.out.println("");
+			for(int j = 0; j < temp.size(); j++)
+			{
+				System.out.println("\t"+(j+1) + ": chat_id: " + temp.get(j).get(0));
+				// query for all recipients
+				String all_r = String.format("select member from CHAT_LIST where chat_id = '%s'", temp.get(j).get(0));
+				List<List<String>> q_r = esql.executeQueryResult(all_r);
+				System.out.print("\tRecipients: \n");
+				//print all the recipients
+				for(int x = 0; x < q_r.size(); x++)
+				{
+					System.out.println("\t\t" + q_r.get(x).get(0) + " ");
+				}
+				System.out.print("\n");
+				System.out.println("\tLast update: " + temp.get(j).get(1));
+				System.out.print("\n");
+				
+			}
+		}catch (Exception e)
+    	{
+	    	System.err.println(e.getMessage());
+    	}
+   }//end printChats
+
+   public static void ReadNotifications(Messenger esql, aUser au){
      	try{
+			String get_msg_id = String.format("select msg_id from NOTIFICATION where usr_login = '%s'", au.login);
+			List< List<String>> n_message_id = esql.executeQueryResult(get_msg_id);
+			
+			//currently prints out all notifications in one go 
+			for(int i = 0; i < n_message_id.size(); i++)
+			{
+				String get_msg_i = String.format("select msg_text from MESSAGE where msg_id = '%s'", n_message_id.get(i).get(0));
+				List< List<String>> msg_i = esql.executeQueryResult(get_msg_i);
+
+				System.out.println(msg_i.get(0).get(0));
+				//assuming it is now considered read delete from Notifications
+				String msg_d = String.format("delete from NOTIFICATION where user_login = '%s' and msg_id = '%s'", au.login, n_message_id.get(i).get(0));
+				System.out.println("\n " + msg_d);
+				//esql.executeUpdate(msg_d);
+			}
+			
 
     	}catch (Exception e)
 	    {
