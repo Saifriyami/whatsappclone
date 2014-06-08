@@ -345,7 +345,7 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                                         {
 
                                             //TODO: BEFORE OUTPUTTING OPTIONS, PRINT MESSAGES IN CHRONOLOGICAL ORDER BASED ON CREATION DATE
-											cMessage(esql, au, cDepth, chats.get(cnum));
+											List<List<String>> messages = cMessage(esql, au, cDepth, chats.get(cnum));
                                             System.out.println("\n\t\t1. Load Earlier Messages");
                                             System.out.println("\t\t2. Load Later Messages");
                                             System.out.println("\t\t3. New Message"); //send notification
@@ -371,13 +371,13 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                                                     //TODO: PRINT 10 EARLIER MESSAGES
                                                     //      IF CANNOT LOAD EARLIER MESSAGES, RETURN ERROR VALUE
                                                     //      THIS WILL NOT AFFECT OTHER USERS' CHAT LIST
-                                                    System.out.print("\t\tLoaded earlier messages\n\n");
+													cDepth = loadE(esql, au, cDepth,chats.get(cnum));	
                                                     break;
                                                 case 2: //load later messages
                                                     //TODO: PRINT 10 LATER MESSAGES
                                                     //      IF CANNOT LOAD LATER MESSSAGES, RETURN ERROR VALUE
                                                     //      THIS WILL NOT AFFECT OTHER USERS' CHAT LIST
-													System.out.print("\t\tLoaded later messages\n\n");
+													cDepth = loadL(esql, au, cDepth, chats.get(cnum));
 													break;
                                                 case 3: //create a new message
                                                     //TODO: INITIALIZE A NEW MESSAGE WITH THE AUTHOR, CREATION DATE, AND ITS TEXT
@@ -389,7 +389,15 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                                                     //TODO: AUTHORIZED USER CAN ONLY DELETE THEIR OWN MESSAGES
                                                     //      ERROR IF ATTEMPT TO DELETE OTHER USERS' MESSAGES OR NON-EXISTANT MESSAGE
                                                     //      UPDATE AFFECTS ALL OTHER USERS' CHATS IN THEIR CHAT LIST
-                                                    System.out.print("\t\tDeleted your own message\n\n");
+													System.out.print("\n\n\tWhat number is the message you want?\n\t");
+													int mnum = readChoice();
+													while(mnum <= 0 || mnum > messages.size())
+													{
+														System.out.println("\tSorry thats not an option");
+														mnum = readChoice();
+													}
+														mnum = mnum -1;
+													//TODO pass in 
                                                     break;
                                                 case 5: //edit messages
                                                     //TODO: AUTHORIZED USER CAN ONLY EDIT THEIR OWN MESSAGES
@@ -819,6 +827,43 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
     	}
    }//end NewMessage
 
+   public static int loadL(Messenger esql, aUser au, int depth, List<String> chat){
+        try{
+			//look if going to next page violates size
+			String sizec = String.format("select * from MESSAGE where chat_id = '%s'", chat.get(0));
+			int size = esql.executeQuery(sizec);
+			if( size > depth*10)
+			{
+				System.out.println("Going to next 10");
+				return depth +1;
+			}
+	    }catch (Exception e)
+    	{
+	    	System.err.println(e.getMessage());
+    	}
+		System.out.println("There are no more messages");
+		return depth;
+   }//end loadE
+
+
+   public static int loadE(Messenger esql, aUser au, int depth, List<String> chat){
+        try{
+			if( depth <= 0)
+			{
+				System.out.println("There is no earlier messages");
+				return depth;
+			}
+			System.out.println("Going to previous 10");
+			return depth +1;
+			
+	    }catch (Exception e)
+    	{
+	    	System.err.println(e.getMessage());
+    	}
+		return depth;
+   }//end loadE
+
+
    public static void deleteMC(Messenger esql, aUser au, List<String> chat){
         try{
 			//check if they are initial 
@@ -940,16 +985,17 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
    }//end NewMessage
 
 
-   public static void cMessage(Messenger esql, aUser au, int depth, List<String> chat_id){
-        try{
+   public static List<List<String>> cMessage(Messenger esql, aUser au, int depth, List<String> chat_id){
+        List<List<String>> m = null;
+		try{
 			//query for 10 chats in depth range 
 			int offset = (depth*10);
 			String tenM = String.format("select * from MESSAGE where chat_id = '%s' order by msg_timestamp DESC Limit 10 offset '%s' ", chat_id.get(0), offset);
-			List<List<String>> m = esql.executeQueryResult(tenM);
-			if( m == null)
+			m = esql.executeQueryResult(tenM);
+			if( m == null || m.size() == 0)
 			{
 				System.out.println("\t\t\tEmpty Chat");
-				return;
+				return m;
 			}
 			System.out.println();
 			for(int i = 0; i < m.size(); i++)
@@ -976,11 +1022,12 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 				}
 					
 			}
-			return;
+			return m;
 	    }catch (Exception e)
     	{
 	    	System.err.println(e.getMessage());
     	}
+		return m;
    }//end cMessage
 
    public static List<List<String>> printChats(Messenger esql, aUser au){
