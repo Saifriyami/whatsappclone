@@ -319,7 +319,7 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 								chats = printChats(esql, au);
                                 System.out.println("\n\t1. Select a Chat");
                                 System.out.println("\t2. New Chat");
-                                System.out.print("\t9. Go back to main menu\n\t");
+                                System.out.print("\t9. Go back to main menu\n\n\t");
 
                                 switch(readChoice())
                                 {
@@ -409,7 +409,18 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                                                     //      *OPTIONAL ?*
                                                     //      THIS MESSAGE WILL LOOK MORE SPECIAL. IT WILL PRINT THE ORIGINAL MESSAGE
                                                     //      AND INDENT THE NEWLY EDITED MESSAGE TO SEE THE NEW CHANGE. 
-                                                    System.out.print("\t\tEdited your own message\n\n");
+                                                   // System.out.print("\t\tEdited your own message\n\n");
+
+													System.out.print("\n\n\tWhat number is the message you want?\n\t");
+													mnum = readChoice();
+													while(mnum <= 0 || mnum > messages.size())
+													{
+														System.out.println("\tSorry thats not an option");
+														mnum = readChoice();
+													}
+													mnum = mnum -1;
+                                                    EditMessage(esql, au, messages.get(mnum));
+
                                                     break;
                                                 case 6: //add member/s to a chat
                                                     //TODO: PRINT LIST OF CHATS AND CHOOSE WHICH CHAT TO ADD MEMBER/MEMBERS TO CHAT
@@ -825,7 +836,7 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 
    public static void NewMessage(Messenger esql, aUser au){
         try{
-			System.out.println("Enter The names of whome you wish to message(enter empty when done)");
+			System.out.println("Enter The names of whom you wish to message(enter empty when done)");
 			ArrayList<String> reciv = new ArrayList<String>();
 			reciv.add(au.login);
 			int rtotal = 0;
@@ -987,7 +998,6 @@ public static void DeleteMessage(Messenger esql, aUser au, List<String> message)
             //query for the author of message and the authorised user
             String query = String.format("SELECT sender_login FROM MESSAGE WHERE msg_id = '%s' and sender_login = '%s'", m_id, au.login);
             int rows = esql.executeQuery(query);
-            System.out.println("BEFORE IF STATEMENT!");
             if(rows == 0)
             {
                 System.out.println("Error: Message doesn't exist or does not belong to authorized user!");
@@ -1000,18 +1010,110 @@ public static void DeleteMessage(Messenger esql, aUser au, List<String> message)
                 System.out.println("\t\tYou have deleted a message!\n");
                 //return;
             }
-            System.out.println("AFTER IF STATEMENT\n");
         } catch(Exception e) {
             System.err.println(e.getMessage());
         }
 
     }
 
+public static void EditMessage(Messenger esql, aUser au, List<String> message)
+{
+    try{
+        String m_id = message.get(0);
+        //query for the author of message and the au
+        String query = String.format("SELECT sender_login FROM MESSAGE WHERE msg_id = '%s' AND sender_login = '%s'", m_id, au.login);    
+        int rows = esql.executeQuery(query);
+        if(rows == 0)
+        {
+            System.out.println("Error: Message doesn't exist or does not belong to the authorized user!");
+            return;
+        }
+        else
+        {
+             /* 
+                System.out.println("ORIGINAL MESSAGE");
+				//System.out.println( + ")");
+				System.out.println("Author: " + message.get(4));
+				System.out.println("Creation Date: " + message.get(2));
+				System.out.println("Text: " + message.get(1));
+				String att_look = String.format("select media_type, URL from MEDIA_ATTACHMENT where msg_id = '%s' ", chat_id.get(0));
+				List<List<String>> aQ = esql.executeQueryResult(att_look);
+                boolean go = 1;
+				if(aQ.size() == 0 || aQ == null)
+				{
+					go = 0;
+				}
+				for(int j = 0; j < aQ.size() && go == 1; j++)
+				{
+					System.out.print("Media type: ");
+					System.out.println(aQ.get(j).get(0));
+					System.out.print("URL :");
+					System.out.println(aQ.get(j).get(1));
+				}
+*/
+                System.out.println("EDIT YOUR OLD MESSAGE");
+                System.out.println("Text: " );
+                String input = in.readLine();
+                System.out.println("FINISHED READING INPUT");
+                String update = String.format("UPDATE MESSAGE SET msg_text = '%s' WHERE msg_id = '%s' AND sender_login = '%s'", input, m_id, au.login);
+                
+
+            esql.executeUpdate(update);
+            System.out.println("\t\tYou have edited a message!\n");
+        }
+    } catch(Exception e){
+        System.err.println(e.getMessage());
+    }
+}
+/*
+public static int NewMessageChat(Messenger esql, aUser au)
+{
+    try{
+
+        System.out.println("Enter the names of whom you wish to message(enter empty when done)\n");
+        ArrayList<String> reciv = new ArrayList<String>();
+        reciv.add(au.login);
+        int rtotal = 0;
+        String r = in.readLine();
+        while(!r.equals(""))
+        {
+            //check if usr exists
+            String ue = String.format("SELECT * FROM USR WHERE login = '%s'", r);
+            int uc = esql.executeQuery(ue);
+            if(uc == 0)
+            {
+                System.out.println("user does not exist");
+            }
+            else
+            {
+                //check if user is blocked
+                String cb = String.format("SELECT * FROM USER_LIST_CONTAINS WHERE list_member ='%s' AND list_id = '%s'", r, au.block_list);
+                int cc = esql.executeQuery(cb);
+                if(cc == 1)
+                {
+                    System.out.println("He is blocked");
+                }
+                else
+                {
+                    reciv.add(r);
+                    rtotal = rtotal + 1;
+                }
+            }
+        }
+        
+    //return -1;
+        
+    } catch(Exception e) {
+        System.err.println(e.getMessage());
+    }
+}
+*/
    public static int loadL(Messenger esql, aUser au, int depth, List<String> chat){
         try{
 			//look if going to next page violates size
 			String sizec = String.format("select * from MESSAGE where chat_id = '%s'", chat.get(0));
 			int size = esql.executeQuery(sizec);
+            System.out.println("THIS IS THE NUMBER OF MESSAGES CURRENTLY: " + size);
 			if( size > depth*10)
 			{
 				System.out.println("Going to next 10");
@@ -1023,7 +1125,7 @@ public static void DeleteMessage(Messenger esql, aUser au, List<String> message)
     	}
 		System.out.println("There are no more messages");
 		return depth;
-   }//end loadE
+   }//end loadL
 
 
    public static int loadE(Messenger esql, aUser au, int depth, List<String> chat){
@@ -1033,8 +1135,10 @@ public static void DeleteMessage(Messenger esql, aUser au, List<String> message)
 				System.out.println("There is no earlier messages");
 				return depth;
 			}
-			System.out.println("Going to previous 10");
-			return depth +1;
+            else{
+			    System.out.println("Going to previous 10");
+    			return depth -1; //originall depth +1
+            }
 			
 	    }catch (Exception e)
     	{
@@ -1125,7 +1229,7 @@ public static void DeleteMessage(Messenger esql, aUser au, List<String> message)
     	{
 	    	System.err.println(e.getMessage());
     	}
-   }//end NewMessage
+   }//end addMC
 
    public static void cDelete(Messenger esql, aUser au, List<String> chat){
         try{
