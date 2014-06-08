@@ -293,11 +293,9 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                              *   TODO: List all notifications of authorized user
                              *   public static void ReadNotifications(Messenger esql, aUser au); (already declared below)
                              */
-                            String subTitle1 = "\tNotifications List";
-                            System.out.println(subTitle1);
-                            System.out.println("\t");
-                            System.out.println(subTitle1.length());
-                            System.out.println("\tCALL ReadNotifications(esql, au) ");
+                            String subTitle1 = "\tNotifications List\n\t";
+                            System.out.print(subTitle1);
+                            System.out.println("CALL ReadNotifications(esql, au) ");
                             break;
                         case 2: //viewing chats
                              /*  
@@ -349,14 +347,13 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                             //chat list
                             int chat_pos = 0;
                             boolean viewing_chat_list = true;
-                            String subTitle2 = "\tChat List";
+                            String subTitle2 = "\tChat List\n\t";
                             while(viewing_chat_list)
                             {
-                                System.out.println(subTitle2);
-                                System.out.println("\t");
+                                System.out.print(subTitle2);
                                 printDashes(subTitle2.length());
                                 //TODO: BEFORE OUTPUTTING OPTIONS, PRINT LIST OF CHATS IN CHRONOLOGICAL ORDER BASED ON UPDATE DATE
-                                System.out.println("\t1. Select a Chat");
+                                System.out.println("\n\t1. Select a Chat");
                                 System.out.println("\t2. New Chat");
                                 System.out.println("\t3. Delete Chat");
                                 System.out.println("\t4. Add member/s to a chat");
@@ -367,17 +364,22 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                                 {
                                     case 1: //choose a chat -- list messaging options
                                         String chat_list_title = "\tChat List\n\t";
+										System.out.print(chat_list_title);
                                         printDashes(chat_list_title.length());
-                                        System.out.print("Chat selected");
-
-                                        /*TODO: Should print list of messages inside chat
-                                         * This should be capable of loading earlier messages
+                                        /*TODO: SELECT A CHAT FROM A THE LIST OF CHATS USING SWITCH STATEMENT
+										 *		RETURN A LIST CONTAINING CHAT AND ITS MESSAGES (list of list?)
+										 *  	Should print list of messages inside chat
+                                         * 		This should be capable of loading earlier messages
                                          */
                                         boolean viewing_chat = true;
                                         while(viewing_chat)
                                         {
+											String subSubTitle1 = "\t\tChat Title";
+											System.out.print(subSubTitle1 + "\n\t");
+                                            printDashes(subSubTitle1.length());
+
                                             //TODO: BEFORE OUTPUTTING OPTIONS, PRINT MESSAGES IN CHRONOLOGICAL ORDER BASED ON CREATION DATE
-                                            System.out.println("\t\t1. Load Earlier Messages");
+                                            System.out.println("\n\t\t1. Load Earlier Messages");
                                             System.out.println("\t\t2. Load Later Messages");
                                             System.out.println("\t\t3. New Message"); //send notification
                                             System.out.println("\t\t4. Delete Message"); //send notification
@@ -392,9 +394,6 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                                              *-------------------------------------------------------------------
                                              * USE THE printDashes(int numDashes) function to print the dashes
                                              */
-											String subSubTitle1 = "\t\tChat Title";
-											System.out.print(subSubTitle1 + "\n\t");
-                                            printDashes(subSubTitle1.length());
 
                                             switch(readChoice())  
                                             {
@@ -507,6 +506,54 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                                     case 1: //edit profile
                                         break;
                                     case 2: //manage contacts
+										switch(readChoice())
+										{
+											case 1: //managing contacts
+												//print menu to console
+												boolean manageContacts = true;
+												String subTitle1 = "\tManaging Contacts";
+												while(manageContacts)
+												{
+													System.out.println(subTitle1);
+													System.out.print("\t");
+													printDashes(subTitle1.length());
+													System.out.println();
+													System.out.println("\t1. Add to contact list");
+													System.out.println("\t2. Browse contact list");
+													System.out.println("\t3. Delete from contact list");
+													System.out.println("\t4. Add to block list");
+													System.out.println("\t5. Delete from block list");
+													System.out.println("\t6. Browse block list");
+													System.out.println("\t9. Return to Main Menu");
+													//determine user's actions                
+													switch(readChoice())
+													{
+														case 1: 
+															AddToContact(esql, au);
+															break;
+														case 2:
+															ListContacts(esql, au);
+															break;
+														case 3:
+															DeleteFromContact(esql, au);
+															break;
+														case 4:
+															AddToBlock(esql, au);
+															break;
+														case 5:
+															DeleteFromBlock(esql, au);
+															break;
+														case 6:
+															ListBlocks(esql, au);
+															break;
+														case 9:
+															manageContacts = false;
+															break;
+														default:
+															System.out.println("Unrecognized choice!");
+															break;
+													} //end manageContacts switch
+												} //end manageContacts while
                                         break;
                                     case 3: //delete profile
                                         break;
