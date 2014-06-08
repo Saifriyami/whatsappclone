@@ -396,7 +396,8 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 														System.out.println("\tSorry thats not an option");
 														mnum = readChoice();
 													}
-														mnum = mnum -1;
+													mnum = mnum -1;
+													DeleteMessage(esql, au, messages.get(mnum));
 													//TODO pass in 
                                                     break;
                                                 case 5: //edit messages
@@ -826,6 +827,34 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 	    	System.err.println(e.getMessage());
     	}
    }//end NewMessage
+
+
+public static void DeleteMessage(Messenger esql, aUser au, List<String> message)
+    {
+        try{
+            String m_id = message.get(0);
+            //query for the author of message and the authorised user
+            String query = String.format("SELECT sender_login FROM MESSAGE WHERE msg_id = '%s' and sender_login = '%s'", m_id, au.login);
+            int rows = esql.executeQuery(query);
+            System.out.println("BEFORE IF STATEMENT!");
+            if(rows == 0)
+            {
+                System.out.println("Error: Message doesn't exist or does not belong to authorized user!");
+                return;
+            }
+            else
+            {
+                String update = String.format("DELETE FROM MESSAGE WHERE msg_id = '%s' AND sender_login = '%s'",m_id, au.login);
+                esql.executeUpdate(update);
+                System.out.println("\t\tYou have deleted a message!\n");
+                //return;
+            }
+            System.out.println("AFTER IF STATEMENT\n");
+        } catch(Exception e) {
+            System.err.println(e.getMessage());
+        }
+
+    }
 
    public static int loadL(Messenger esql, aUser au, int depth, List<String> chat){
         try{
