@@ -290,7 +290,7 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                     {
                         case 1: //viewing notifications
                             /*
-                             *   TODO: List all notifications of authorized user
+                             *   List all notifications of authorized user
                              *   public static void ReadNotifications(Messenger esql, aUser au); (already declared below)
                              */
                             String subTitle1 = "\tNotifications List\n\t";
@@ -300,7 +300,7 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                             break;
                         case 2: //viewing chats
                              /*  
-                             *  TODO: List all chats of authorized user
+                             *  List all chats of authorized user
 
                              * Method to list current 10 chats or view a chat's details. 
                              *
@@ -349,12 +349,13 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                             int chat_pos = 0;
                             boolean viewing_chat_list = true;
                             String subTitle2 = "\tChat List\n\t";
+							List<List<String>> chats;
                             while(viewing_chat_list)
                             {
                                 System.out.print(subTitle2);
                                 printDashes(subTitle2.length());
-                                //TODO: BEFORE OUTPUTTING OPTIONS, PRINT LIST OF CHATS IN CHRONOLOGICAL ORDER BASED ON UPDATE DATE
-								printChats(esql, au);
+                                //BEFORE OUTPUTTING OPTIONS, PRINT LIST OF CHATS IN CHRONOLOGICAL ORDER BASED ON UPDATE DATE
+								chats = printChats(esql, au);
                                 System.out.println("\n\t1. Select a Chat");
                                 System.out.println("\t2. New Chat");
                                 System.out.println("\t3. Delete Chat");
@@ -365,7 +366,19 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                                 switch(readChoice())
                                 {
                                     case 1: //choose a chat -- list messaging options
-                                        String chat_list_title = "\tChat List\n\t";
+										if(chats.size() == 0)
+										{
+											System.out.println("You have no chats");
+										}
+
+										System.out.print("\n\n\tWhat number is the chat you want? :");
+										int cnum = readChoice();
+										while(cnum < 0 || cnum > chats.size())
+										{
+											System.out.println("\tSorry thats not an option");
+											cnum = readChoice();
+										} 
+									    String chat_list_title = "\tChat List\n\t";
 										System.out.print(chat_list_title);
                                         printDashes(chat_list_title.length());
                                         /*TODO: SELECT A CHAT FROM A THE LIST OF CHATS USING SWITCH STATEMENT
@@ -373,14 +386,16 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 										 *  	Should print list of messages inside chat
                                          * 		This should be capable of loading earlier messages
                                          */
+										int cDepth = 1;
                                         boolean viewing_chat = true;
                                         while(viewing_chat)
                                         {
-											String subSubTitle1 = "\t\tChat Title";
+											String subSubTitle1 = "\n\t\tChat Title";
 											System.out.print(subSubTitle1 + "\n\t");
                                             printDashes(subSubTitle1.length());
 
                                             //TODO: BEFORE OUTPUTTING OPTIONS, PRINT MESSAGES IN CHRONOLOGICAL ORDER BASED ON CREATION DATE
+											cMessage(esql, au, cDepth, chats.get(cnum));
                                             System.out.println("\n\t\t1. Load Earlier Messages");
                                             System.out.println("\t\t2. Load Later Messages");
                                             System.out.println("\t\t3. New Message"); //send notification
@@ -859,19 +874,31 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
     	}
    }//end NewMessage
 
-   public static void printChats(Messenger esql, aUser au){
+   public static void cMessage(Messenger esql, aUser au, int depth, List<String> chat_id){
         try{
-			// Get all the chats user has membership of
+			//query for 10 chats in depth range 
+			String tenM = String.format("select message from MESSAGE m where chat_id");
+	    }catch (Exception e)
+    	{
+	    	System.err.println(e.getMessage());
+    	}
+   }//end cMessage
+
+   public static List<List<String>> printChats(Messenger esql, aUser au){
+		List<List<String>> q_r = null;
+        try{
+			// Get all the chats user has membership of and find most current 
 				String c_time = String.format("select * from (select m.chat_id, MAX(m.msg_timestamp) as msg_timestamp from MESSAGE m,(select chat_id from CHAT_LIST where member = '%s') as c where c.chat_id = m.chat_id group by m.chat_id ) as id_t order by id_t.msg_timestamp", au.login);  
  
 	    	List< List<String >> temp = esql.executeQueryResult(c_time);
 			System.out.println("");
+			//print out in 
 			for(int j = 0; j < temp.size(); j++)
 			{
 				System.out.println("\t"+(j+1) + ": chat_id: " + temp.get(j).get(0));
 				// query for all recipients
 				String all_r = String.format("select member from CHAT_LIST where chat_id = '%s'", temp.get(j).get(0));
-				List<List<String>> q_r = esql.executeQueryResult(all_r);
+				q_r = esql.executeQueryResult(all_r);
 				System.out.print("\tRecipients: \n");
 				//print all the recipients
 				for(int x = 0; x < q_r.size(); x++)
@@ -883,10 +910,12 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 				System.out.print("\n");
 				
 			}
+			return q_r;
 		}catch (Exception e)
     	{
 	    	System.err.println(e.getMessage());
     	}
+		return q_r;
    }//end printChats
 
    public static void ReadNotifications(Messenger esql, aUser au){
