@@ -327,7 +327,7 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 											System.out.println("\tYou have no chats\n");
 											break;	
 										}
-
+                                        
 										System.out.print("\n\n\tWhat number is the chat you want?\n\t");
 										int cnum = readChoice();
 										while(cnum <= 0 || cnum > chats.size())
@@ -336,21 +336,13 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 											cnum = readChoice();
 										}
 										cnum = cnum -1; 
-									    String chat_list_title = "\tChat List\n\t";
-										System.out.print(chat_list_title);
-                                        printDashes(chat_list_title.length());
-                                        /*TODO: SELECT A CHAT FROM A THE LIST OF CHATS USING SWITCH STATEMENT
-										 *		RETURN A LIST CONTAINING CHAT AND ITS MESSAGES (list of list?)
-										 *  	Should print list of messages inside chat
-                                         * 		This should be capable of loading earlier messages
-                                         */
-										int cDepth = 0;
+                                        int cDepth = 0;
                                         boolean viewing_chat = true;
-                                        while(viewing_chat)
-                                        {
 											String subSubTitle1 = "\n\t\tChat Title";
 											System.out.print(subSubTitle1 + "\n\t\t");
                                             printDashes(subSubTitle1.length());
+                                        while(viewing_chat)
+                                        {
 
                                             //TODO: BEFORE OUTPUTTING OPTIONS, PRINT MESSAGES IN CHRONOLOGICAL ORDER BASED ON CREATION DATE
 											cMessage(esql, au, cDepth, chats.get(cnum));
