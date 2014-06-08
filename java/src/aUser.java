@@ -26,7 +26,7 @@ public class aUser{
 	
 	public  aUser(Messenger esql, String login){
 		this.login = login;
-		System.out.println(login);
+//		System.out.println(login);
 		String query = String.format("SELECT * FROM Usr WHERE  login = '%s'" , login);
 		List<List<String>> al;
 		try{
@@ -39,21 +39,21 @@ public class aUser{
 		// TODO double check 
 		//ListIterator li = new al.ListIterator();
 		this.password = (String) al.get(0).get(1);
-		System.out.println(password);
+//		System.out.println(password);
 		this.phoneNum = (String) al.get(0).get(2);
-		System.out.println(phoneNum);
+//		System.out.println(phoneNum);
 
 		if(al.get(0).get(3) != null)
 		{	this.status = (String) al.get(0).get(3);
-			System.out.println(status);
+//			System.out.println(status);
 		}
 		else
-			System.out.println("status == null");
+//			System.out.println("status == null");
 
 		//System.out.println((String) al.get(0).get(3));
 		this.block_list = Integer.parseInt( al.get(0).get(4) );
-		System.out.println(block_list);
+//		System.out.println(block_list);
 		this.contact_list = Integer.parseInt( al.get(0).get(5));
-		System.out.println(contact_list);
+//		System.out.println(contact_list);
 	}
 }
