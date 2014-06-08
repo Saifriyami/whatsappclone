@@ -368,7 +368,7 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                                     case 1: //choose a chat -- list messaging options
                                         String chat_list_title = "\tChat List\n\t";
                                         printDashes(chat_list_title.length());
-                                        Sysyem.out.print("Chat selected");
+                                        System.out.print("Chat selected");
 
                                         /*TODO: Should print list of messages inside chat
                                          * This should be capable of loading earlier messages
@@ -392,12 +392,13 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                                              *-------------------------------------------------------------------
                                              * USE THE printDashes(int numDashes) function to print the dashes
                                              */
-                                            switch(read_choice())  
+											String subSubTitle1 = "\t\tChat Title";
+											System.out.print(subSubTitle1 + "\n\t");
+                                            printDashes(subSubTitle1.length());
+
+                                            switch(readChoice())  
                                             {
-                                                String subSubTitle1 = "\t\tChat Title";
-                                                System.out.print(subsubTitle1 + "\n\t");
-                                                printDashes(subSubTitle1.length());
-                                                                                                  
+                                                                                                                                                  
                                                 case 1: //load earlier messages
                                                     //TODO: PRINT 10 EARLIER MESSAGES
                                                     //      IF CANNOT LOAD EARLIER MESSAGES, RETURN ERROR VALUE
@@ -408,6 +409,8 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                                                     //TODO: PRINT 10 LATER MESSAGES
                                                     //      IF CANNOT LOAD LATER MESSSAGES, RETURN ERROR VALUE
                                                     //      THIS WILL NOT AFFECT OTHER USERS' CHAT LIST
+													System.out.print("\t\tLoaded later messages\n\n");
+													break;
                                                 case 3: //create a new message
                                                     //TODO: INITIALIZE A NEW MESSAGE WITH THE AUTHOR, CREATION DATE, AND ITS TEXT
                                                     //IF MEDIA ATTACHMENT OR URL IS ATTACHED TO MESSAGE, THEN DISPLAY THAT ATTACHEMENT/ URL TOO
@@ -437,7 +440,7 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                                                     viewing_chat_list = false;
                                                     break;
                                                 default:
-                                                    System.println("Unrecognized Choice!");
+                                                    System.out.println("Unrecognized Choice!");
                                                     break;
                                             }//end viewing_chat switch
                                            
@@ -963,7 +966,9 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
             System.err.println(e.getMessage());
         }
    }//end ListContacts
-        public static void NewMessage(Messenger esql, aUser au){
+/*
+        public static void NewMessage(Messenger esql, aUser au)
+
             try{
                 System.out.println("Enter The names of whom you wish to message(enter empty when done)");
                 String[] reciv;
@@ -983,14 +988,14 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                 //query to search if there is a chat with all of them
                 //TODO idea: narrow down to count(*) of chats with au.login
                 //very expensive to continue
-                String query = String.format("select chat_id from chat_list where count(chat_id) = '%s',
+                String query = String.format("select chat_id from chat_list where count(chat_id) = '%s'");
          
             }catch (Exception e) {
                 System.err.println(e.getMessage());
             }
    }//end
+*/
 
-/*
    public static void NewMessage(Messenger esql){
         try{
 	    }catch (Exception e)
@@ -998,7 +1003,7 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 	    	System.err.println(e.getMessage());
     	}
    }//end NewMessage
-*/
+
    public static void ReadNotifications(Messenger esql){
      	try{
 
@@ -1192,8 +1197,10 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                 {
                     System.out.print("\t");
                 }
-                System.out.println("Unknown Error!\n")
+		        System.out.println("Unknown Error!\n");
+				break;
         }
+
     }
 
 }//end Messenger
