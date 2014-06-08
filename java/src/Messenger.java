@@ -214,6 +214,10 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
       }//end try
    }//end cleanup
 
+/*============================================================*/
+/*                      MAIN FUNCTION                         *
+ *============================================================*/ 
+
    /**
     * The main execution method
     *
@@ -276,14 +280,284 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                     System.out.println(userTitle);
                     printDashes(userTitle.length());
                     System.out.println();
+                    System.out.println("1. View Notifications");
+                    System.out.println("2. View Chats");
+                    System.out.println("3. New Message");
+                    System.out.println("4. Settings"); 
+                    System.out.println("9. Log out");
                     
+                    switch(readChoice())
+                    {
+                        case 1: //viewing notifications
+                            /*
+                             *   TODO: List all notifications of authorized user
+                             *   public static void ReadNotifications(Messenger esql, aUser au); (already declared below)
+                             */
+                            String subTitle1 = "\tNotifications List";
+                            System.out.println(subTitle1);
+                            System.out.println("\t");
+                            System.out.println(subTitle1.length());
+                            System.out.println("\tCALL ReadNotifications(esql, au) ");
+                            break;
+                        case 2: //viewing chats
+                             /*  
+                             *  TODO: List all chats of authorized user
+
+                             * Method to list current 10 chats or view a chat's details. 
+                             *
+                             * @param Messenger esql: to execute and update queries.
+                             * @param aUser au: authorized user's information
+                             * @param int choice: value to determine prev/next 10 chats or to select a chat
+                             * @param int position: value of the starting position of a 10 chat group
+                             * @return current value of a sequence
+                             * @throws java.sql.SQLException when failed to execute the query
+        
+                             *  public static int BrowseChats(Messenger esql, aUser au, int choice, int position); not yet defined
+                             *  Each chat should print like this:
+                             *  ------------------------------
+                             *  chat_id: 0                     
+                             *  recipients: twang033, Jimmy
+                             *  ------------------------------
+                             *  .
+                             *  .
+                             *  .
+                             *  ------------------------------
+                             *  chat_id: 9
+                             *  recipients: Jimmy
+                             *  ------------------------------
+                             *  If choice == 1
+                             *      show list of chats as options in a sub-menu
+                             * 
+                             *  If choice == 2 or 3
+                             *      show list of prev/next 10 chats
+                             *  ------------------------------
+                             *  1. chat_id: 0                     
+                             *     recipients: twang033, Jimmy
+                             *  ------------------------------
+                             *  . 
+                             *  .
+                             *  .
+                             *  ------------------------------
+                             *  9. chat_id: 9
+                             *     recipients: Jimmy
+                             *  ------------------------------
+                             * I propose a wrapper function where we have "ListChats" function that only take
+                             * in the current 10 chats and we use that list as the 10 that we use for selecting
+                             * a chat.
+                             * 
+                             */
+                            //chat list
+                            int chat_pos = 0;
+                            boolean viewing_chat_list = true;
+                            String subTitle2 = "\tChat List";
+                            while(viewing_chat_list)
+                            {
+                                System.out.println(subTitle2);
+                                System.out.println("\t");
+                                printDashes(subTitle2.length());
+                                //TODO: BEFORE OUTPUTTING OPTIONS, PRINT LIST OF CHATS IN CHRONOLOGICAL ORDER BASED ON UPDATE DATE
+                                System.out.println("\t1. Select a Chat");
+                                System.out.println("\t2. New Chat");
+                                System.out.println("\t3. Delete Chat");
+                                System.out.println("\t4. Add member/s to a chat");
+                                System.out.println("\t5. Delete member/s from a chat");
+                                System.out.println("\t9. Go back to main menu");
+
+                                switch(readChoice())
+                                {
+                                    case 1: //choose a chat -- list messaging options
+                                        String chat_list_title = "\tChat List\n\t";
+                                        printDashes(chat_list_title.length());
+                                        Sysyem.out.print("Chat selected");
+
+                                        /*TODO: Should print list of messages inside chat
+                                         * This should be capable of loading earlier messages
+                                         */
+                                        boolean viewing_chat = true;
+                                        while(viewing_chat)
+                                        {
+                                            //TODO: BEFORE OUTPUTTING OPTIONS, PRINT MESSAGES IN CHRONOLOGICAL ORDER BASED ON CREATION DATE
+                                            System.out.println("\t\t1. Load Earlier Messages");
+                                            System.out.println("\t\t2. Load Later Messages");
+                                            System.out.println("\t\t3. New Message"); //send notification
+                                            System.out.println("\t\t4. Delete Message"); //send notification
+                                            System.out.println("\t\t5. Edit Message"); //send notification
+                                            System.out.println("\t\t8. Back to chat list");
+                                            System.out.println("\t\t9. Back to main menu");
+                                            //TODO: EACH MESSAGE SHOULD LOOK LIKE THIS
+                                            /*-------------------------------------------------------------------
+                                             *  Author:                         Creation Date:
+                                             *  Text:
+                                             *  sdkjfhdsfjs --THIS IS THE BODY OF THE TEXT-- ESLKGJESLKFJS
+                                             *-------------------------------------------------------------------
+                                             * USE THE printDashes(int numDashes) function to print the dashes
+                                             */
+                                            switch(read_choice())  
+                                            {
+                                                String subSubTitle1 = "\t\tChat Title";
+                                                System.out.print(subsubTitle1 + "\n\t");
+                                                printDashes(subSubTitle1.length());
+                                                                                                  
+                                                case 1: //load earlier messages
+                                                    //TODO: PRINT 10 EARLIER MESSAGES
+                                                    //      IF CANNOT LOAD EARLIER MESSAGES, RETURN ERROR VALUE
+                                                    //      THIS WILL NOT AFFECT OTHER USERS' CHAT LIST
+                                                    System.out.print("\t\tLoaded earlier messages\n\n");
+                                                    break;
+                                                case 2: //load later messages
+                                                    //TODO: PRINT 10 LATER MESSAGES
+                                                    //      IF CANNOT LOAD LATER MESSSAGES, RETURN ERROR VALUE
+                                                    //      THIS WILL NOT AFFECT OTHER USERS' CHAT LIST
+                                                case 3: //create a new message
+                                                    //TODO: INITIALIZE A NEW MESSAGE WITH THE AUTHOR, CREATION DATE, AND ITS TEXT
+                                                    //IF MEDIA ATTACHMENT OR URL IS ATTACHED TO MESSAGE, THEN DISPLAY THAT ATTACHEMENT/ URL TOO
+                                                    //UPDATE AFFECTS ALL OTHER USERS' CHATS IN THEIR CHAT LIST
+                                                    System.out.println("\t\tCreated a new Message\n\n");
+                                                    break;
+                                                case 4: //Delete your own message
+                                                    //TODO: AUTHORIZED USER CAN ONLY DELETE THEIR OWN MESSAGES
+                                                    //      ERROR IF ATTEMPT TO DELETE OTHER USERS' MESSAGES OR NON-EXISTANT MESSAGE
+                                                    //      UPDATE AFFECTS ALL OTHER USERS' CHATS IN THEIR CHAT LIST
+                                                    System.out.print("\t\tDeleted your own message\n\n");
+                                                    break;
+                                                case 5: //edit messages
+                                                    //TODO: AUTHORIZED USER CAN ONLY EDIT THEIR OWN MESSAGES
+                                                    //      ERROR IF ATTEMPT TO EDIT OTHER USERS' MESSAGES OR NON-EXISTANT MESSAGE
+                                                    //      UPDATE AFFECTS ALL OTHER USERS' CHATS IN THEIR CHAT LIST
+                                                    //      *OPTIONAL ?*
+                                                    //      THIS MESSAGE WILL LOOK MORE SPECIAL. IT WILL PRINT THE ORIGINAL MESSAGE
+                                                    //      AND INDENT THE NEWLY EDITED MESSAGE TO SEE THE NEW CHANGE. 
+                                                    System.out.print("\t\tEdited your own message\n\n");
+                                                    break;
+                                                case 8: //Go back to chat list
+                                                    viewing_chat = false;
+                                                    break;
+                                                case 9: //Go back to main menu
+                                                    viewing_chat = false;
+                                                    viewing_chat_list = false;
+                                                    break;
+                                                default:
+                                                    System.println("Unrecognized Choice!");
+                                                    break;
+                                            }//end viewing_chat switch
+                                           
+                                        }//end viewing_chat while
+                                        break;
+                                    case 2: //create a new chat
+                                        String subsubTitle2 = "\t\tCreate a new chat";
+                                        System.out.println(subsubTitle2 + "\n\t");
+                                        printDashes(subsubTitle2.length());
+                                        //TODO: INITIALIZE A NEW CHAT WITH AUTHORIZED USER AS THE INITIAL SENDER
+                                        //      ASK THE AUTHORIZED USER TO INPUT MEMBERS OF THIS USER LIST
+                                        //      *ERROR* IF USER INPUTS NON-EXISTANT USERS, BLOCKED USER OR AUTHORIZED USER IS BLOCKED BY OTHER USERS
+                                        break;
+                                    case 3: //delete a chat
+                                        String subsubTitle3 = "\t\tDelete a chat";
+                                        System.out.println(subsubTitle3 + "\n\t");
+                                        printDashes(subsubTitle3.length());
+                                        //TODO: PRINT LIST OF CHATS AND CHOOSE WHICH CHAT TO DELETE
+                                        //      LIST OF CHATS WILL BE DISPLAYED WITH USER OPTIONS (USE A SWITCH STATEMENT)
+                                        break;
+                                    case 4: //add member/s to a chat
+                                        //TODO: PRINT LIST OF CHATS AND CHOOSE WHICH CHAT TO ADD MEMBER/MEMBERS TO CHAT
+                                        //      UPDATES ALL USERS' CHATS
+                                        //      ERROR IF USER INPUTS NON-EXISTANT USER OR BLOCKED USER OR AUTHORIZED USER IS BLOCKED BY OTHER USERS
+                                        break;
+                                    case 5: //delete member/s to a chat
+                                        //TODO: PRINT LIST OF CHATS AND CHOOSE WHICH CHAT TO ADD MEMBER/MEMBERS FROM CHAT
+                                        //      UPDATEs ALL USERS' CHATS
+                                        //      ERROR IF USER INPUTS NON-EXISTANT USER
+                                        break;
+                                    case 9: //Go back to main menu
+                                        viewing_chat_list = false;
+                                        break;
+                                    default:
+                                        System.out.println("Unrecognised choice!");
+                                        break;
+                        
+                                } //end viewing_chat_list switch
+                            }// end viewing_chat_list while
+                            break;
+                        case 3: //new message
+                            /*
+                                TODO:  INITIALIZE A NEW MESSAGE
+                                       ASK INPUT FOR MEMBERS
+                                       ERROR IF INPUT CONTAINS NON-EXISTANT USERS, BLOCKED USERS, OR AUTHORIZED USER IS BLOCKED
+                            */
+                            String subTitle3 = "\tNew Message";
+                            System.out.println(subTitle3);
+                            System.out.print("\t");
+                            printDashes(subTitle3.length());
+
+                            usermenu = false;
+                            break;
+                        case 4: //settings
+                            String subTitle4 = "\tSettings";
+                            System.out.println(subTitle4 + "\n\t");
+                            printDashes(subTitle4.length());
+                            
+                            boolean settings = true;
+                            while(settings)
+                            {
+                                switch(readChoice())
+                                {
+                                    case 1: //edit profile
+                                        break;
+                                    case 2: //manage contacts
+                                        break;
+                                    case 3: //delete profile
+                                        break;
+                                    case 4: 
+                                        break;
+                                    case 5:
+                                        break;
+                                    case 6:
+                                        break;
+                                    case 9: //log out
+                                        settings = false;
+                                        break;
+                                    default:
+                                        System.out.println("\t\tUnrecognized choice!");
+
+                                }//end settings switch
+                            } //end settings while
+                            break;
+                        case 9:
+                            usermenu = false;
+                            break;
+                        default: //invalid options
+                            System.out.println("Unrecognized choice!");
+                            break;
+
+                    }//end usermenu switch
+                }//end usermenu while
+            }//end if authorised user != NULL
+         }//end main while
+      }catch(Exception e) {
+         System.err.println (e.getMessage ());
+      }finally{
+         // make sure to cleanup the created table and close the connection.
+         try{
+            if(esql != null) {
+               System.out.print("Disconnecting from database...");
+               esql.cleanup ();
+               System.out.println("Done\n\nBye !");
+            }//end if
+         }catch (Exception e) {
+            // ignored.
+         }//end try
+      }//end try
+   }//end main
+
+/*
                     System.out.println("1. Manage Contacts");
                     System.out.println("2. View Notifications");
                     System.out.println("3. View Chats");
                     System.out.println("4. New Message");
                     System.out.println("9. Log out");
+
                     //Add sub-menu for all options
-                  
+
                     switch(readChoice())
                     {
                         case 1: //managing contacts
@@ -334,20 +608,22 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                             } //end manageContacts while
                             break;
                         case 2: //viewing notifications
-            
+*/            
                             /*
                              *   TODO: List all notifications of authorized user
                              *   public static void ReadNotifications(Messenger esql, aUser au); (already declared below)
                              */
-                            System.out.println("TODO: read all notifications of authorized user");
+/*                            System.out.println("TODO: read all notifications of authorized user");
                             String subTitle2 = "\tNotifications List";
                             System.out.println(subTitle2);
                             System.out.println("\t");
                             System.out.println(subTitle2.length());
                             System.out.println("\tCALL ReadNotifications(esql, au) ");
+
                            
                             break;
                         case 3: //viewing chats
+*/
                             /*  
                              *  TODO: List all chats of authorized user
 
@@ -395,7 +671,7 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                              * 
                              */
                             //chat list
-                            int chat_pos = 0;
+/*                            int chat_pos = 0;
                             boolean viewing_chats = true;
                             String subTitle3 = "\tChat List";
                             while(viewing_chats)
@@ -431,10 +707,12 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                             }// end viewing_chats while
                             break;
                         case 4: //new message
+*/
                             /*
                                 TODO: Determine whether the "new message" function should return a boolean function or not.
                                 
                              */
+/*
                             String subTitle4 = "\tNew Message";
                             System.out.println(subTitle4);
                             System.out.print("\t");
@@ -449,6 +727,8 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                             System.out.println("Unrecognized choice!");
                             break;
                     }//end usermenu switch
+*/
+/*
                 }//end usermenu while
             }//end if authorised user != NULL
          }//end main while
@@ -467,7 +747,7 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
          }//end try
       }//end try
    }//end main
-
+*/
 
 /*============================================================*/
 /*              START OF FUNCTION DEFINITIONS                 *
@@ -679,12 +959,38 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
             printDashes(contact_title_size);
             System.out.println();
 
-        } catch (Exception e)
-        {
+        } catch (Exception e) {
             System.err.println(e.getMessage());
         }
    }//end ListContacts
+        public static void NewMessage(Messenger esql, aUser au){
+            try{
+                System.out.println("Enter The names of whom you wish to message(enter empty when done)");
+                String[] reciv;
+                int rtotal = 0;
+                String r = in.readLine();
+                while(!r.equals(""))
+                {
+                    reciv.add(r);
+                    rtotal = rtotal + 1;
+                    r = in.readLine();
+                }
+                if(rtotal == 0)
+                {
+                    System.out.println("Nobody to message back to menu");
+                    return;
+                }
+                //query to search if there is a chat with all of them
+                //TODO idea: narrow down to count(*) of chats with au.login
+                //very expensive to continue
+                String query = String.format("select chat_id from chat_list where count(chat_id) = '%s',
+         
+            }catch (Exception e) {
+                System.err.println(e.getMessage());
+            }
+   }//end
 
+/*
    public static void NewMessage(Messenger esql){
         try{
 	    }catch (Exception e)
@@ -692,7 +998,7 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 	    	System.err.println(e.getMessage());
     	}
    }//end NewMessage
-
+*/
    public static void ReadNotifications(Messenger esql){
      	try{
 
@@ -854,5 +1160,40 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
         }
 
        }//end ListBlocks
+
+/*================================================================*
+ *                  ERROR CHECKING TEST                           *
+ *================================================================*/
+
+    public static void errorResult(int depth, int error)
+    {
+        switch(error)
+        {
+            case -1:
+                break;
+            case -2:
+                break;
+            case -3:
+                break;
+            case -4:
+                break;
+            case -5:
+                break;
+            case -6:
+                break;
+            case -7:
+                break;
+            case -8:
+                break;
+            case -9:
+                break;
+            default:
+                for(int i = 0; i < depth; ++i)
+                {
+                    System.out.print("\t");
+                }
+                System.out.println("Unknown Error!\n")
+        }
+    }
 
 }//end Messenger
