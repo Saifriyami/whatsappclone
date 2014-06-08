@@ -42,7 +42,7 @@ CREATE TABLE CHAT_LIST(
 	member char(50),
 	PRIMARY KEY(chat_id,member), 
 	FOREIGN KEY(member) REFERENCES USR(login), 
-	FOREIGN KEY(chat_id) REFERENCES CHAT(chat_id));
+	FOREIGN KEY(chat_id) REFERENCES CHAT(chat_id) on delete cascade);
 
 CREATE TABLE MESSAGE(
 	msg_id serial, 
@@ -53,7 +53,7 @@ CREATE TABLE MESSAGE(
 	chat_id integer,
 	PRIMARY KEY(msg_id), 
 	FOREIGN KEY(sender_login) REFERENCES USR(login),
-	FOREIGN KEY(chat_id) REFERENCES CHAT(chat_id));
+	FOREIGN KEY(chat_id) REFERENCES CHAT(chat_id) On delete cascade);
 
 CREATE TABLE MEDIA_ATTACHMENT(
 	media_id serial, 
@@ -61,11 +61,11 @@ CREATE TABLE MEDIA_ATTACHMENT(
 	URL char(256) NOT NULL,
 	msg_id integer, 
 	PRIMARY KEY(media_id), 
-	FOREIGN KEY(msg_id) REFERENCES MESSAGE(msg_id));
+	FOREIGN KEY(msg_id) REFERENCES MESSAGE(msg_id) on delete cascade);
 
 CREATE TABLE NOTIFICATION(
 	usr_login char(50), 
 	msg_id integer,
 	PRIMARY KEY(usr_login,msg_id),
 	FOREIGN KEY(usr_login) REFERENCES USR(login),
-	FOREIGN KEY(msg_id) REFERENCES MESSAGE(msg_id));
+	FOREIGN KEY(msg_id) REFERENCES MESSAGE(msg_id) on delete cascade);

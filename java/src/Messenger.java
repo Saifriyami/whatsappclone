@@ -338,9 +338,9 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 										cnum = cnum -1; 
                                         int cDepth = 0;
                                         boolean viewing_chat = true;
-											String subSubTitle1 = "\n\t\tChat Title";
-											System.out.print(subSubTitle1 + "\n\t\t");
-                                            printDashes(subSubTitle1.length());
+										String subSubTitle1 = "\n\t\tChat Title";
+										System.out.print(subSubTitle1 + "\n\t\t");
+                                        printDashes(subSubTitle1.length());
                                         while(viewing_chat)
                                         {
 
@@ -351,8 +351,8 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                                             System.out.println("\t\t3. New Message"); //send notification
                                             System.out.println("\t\t4. Delete Message"); //send notification
                                             System.out.println("\t\t5. Edit Message"); //send notification
-                                            System.out.println("\t\t6. Add member/s to chat");
-                                            System.out.println("\t\t7. Delete member/s from chat");
+                                            System.out.println("\t\t6. Add member to chat");
+                                            System.out.println("\t\t7. Delete member from chat");
                                             System.out.println("\t\t8. Delete this chat");
                                             System.out.println("\t\t9. Back to chat list");
                                             //TODO: EACH MESSAGE SHOULD LOOK LIKE THIS
@@ -404,20 +404,23 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                                                     //TODO: PRINT LIST OF CHATS AND CHOOSE WHICH CHAT TO ADD MEMBER/MEMBERS TO CHAT
                                                     //      UPDATES ALL USERS' CHATS
                                                     //      ERROR IF USER INPUTS NON-EXISTANT USER OR BLOCKED USER OR AUTHORIZED USER IS BLOCKED BY OTHER USERS
+													addMC(esql, au, chats.get(cnum));
                                                     break;
                                                 case 7: //delete member/s to a chat
                                                     //TODO: PRINT LIST OF CHATS AND CHOOSE WHICH CHAT TO ADD MEMBER/MEMBERS FROM CHAT
                                                     //      UPDATEs ALL USERS' CHATS
                                                     //      ERROR IF USER INPUTS NON-EXISTANT USER
+													deleteMC(esql, au, chats.get(cnum));
                                                     break;
                                                 case 8: //delete a chat
                                                     String subsubTitle3 = "\t\tDelete a chat";
                                                     System.out.print(subsubTitle3 + "\n\t\t");
                                                     printDashes(subsubTitle3.length());
                                                     System.out.println();
-                                                    //TODO: PRINT LIST OF CHATS AND CHOOSE WHICH CHAT TO DELETE
+                                                    //: PRINT LIST OF CHATS AND CHOOSE WHICH CHAT TO DELETE
                                                     //      LIST OF CHATS WILL BE DISPLAYED WITH USER OPTIONS (USE A SWITCH STATEMENT)
-                                                    break;
+													cDelete(esql, au,chats.get(cnum)); 
+													
                                                 case 9: //Go back to main menu
                                                     viewing_chat = false;
                                                     break;
@@ -815,6 +818,127 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 	    	System.err.println(e.getMessage());
     	}
    }//end NewMessage
+
+   public static void deleteMC(Messenger esql, aUser au, List<String> chat){
+        try{
+			//check if they are initial 
+			String check_i = String.format("select * from CHAT where chat_id = '%s' and init_sender = '%s'", chat.get(0), au.login);
+    		int cnum = esql.executeQuery(check_i);
+  			if(cnum ==0)
+    		{
+        		System.out.println("You are not the initial chat sender");
+        		return;
+    		}
+    		else{
+        		System.out.println("Please give login of user to be deleted from chat ");
+        		String loginToDelete = in.readLine();
+        		// query if user exists
+				String exists = String.format("select * from CHAT_LIST where member = '%s' and chat_id = '%s' ", loginToDelete, chat.get(0));
+        		int lnum = esql.executeQuery(exists);
+        		if(lnum == 0)
+        		{
+            		System.out.println("User does not exist in chat");
+            		return;
+        		}
+				String already = String.format("select * from CHAT_LIST where chat_id = '%s' and member = '%s'", chat.get(0), loginToDelete);
+				int al = esql.executeQuery(already);
+				if( al == 0)
+				{
+					System.out.println("They are not in this Chat");
+					return;
+				}
+
+				String update = String.format("delete from CHAT_LIST where chat_id = '%s' and member = '%s' ", chat.get(0), loginToDelete);
+        		esql.executeUpdate(update);
+        		System.out.println("Deleted " + loginToDelete + " Successfully"); 
+    		}
+    		return;
+
+	    }catch (Exception e)
+    	{
+	    	System.err.println(e.getMessage());
+    	}
+   }//end deleteMC
+
+
+
+   public static void addMC(Messenger esql, aUser au, List<String> chat){
+        try{
+			//check if they are initial 
+			String check_i = String.format("select * from CHAT where chat_id = '%s' and init_sender = '%s'",chat.get(0), au.login);
+    		int cnum = esql.executeQuery(check_i);
+    		if(cnum ==0)
+    		{
+        		System.out.println("You are not the initial chat sender");
+        		return;
+    		}
+    		else{
+        		System.out.println("Please give login of user to be added: ");
+        		String loginToAdd = in.readLine();
+        		// query if user exists
+				String exists = String.format("select * from USR where login = '%s'",loginToAdd);
+        		int lnum = esql.executeQuery(exists);
+        		if(lnum == 0)
+        		{
+            		System.out.println("User does not exist");
+            		return;
+        		}
+				String already = String.format("select * from CHAT_LIST where chat_id = '%s' and member = '%s'", chat.get(0), loginToAdd);
+				int al = esql.executeQuery(already);
+				if( al == 1)
+				{
+					System.out.println("Already in chat");
+					return;
+				}
+				String update = String.format("insert into CHAT_LIST values('%s', '%s')", chat.get(0), loginToAdd);
+        		esql.executeUpdate(update);
+        		System.out.println("Added " + loginToAdd + " Successfully"); 
+    		}
+    		return;
+
+	    }catch (Exception e)
+    	{
+	    	System.err.println(e.getMessage());
+    	}
+   }//end NewMessage
+
+   public static void cDelete(Messenger esql, aUser au, List<String> chat){
+        try{
+				// check if they are initial
+				String check_i = String.format("select * from CHAT where chat_id = '%s' and init_sender = '%s'",chat.get(0),au.login);
+				int cnum = esql.executeQuery(check_i);
+				if(cnum == 0)
+				{
+					System.out.println("You are not the initial chat sender");
+    				return;
+				}
+				else{
+					System.out.println("\tAll related messages will be deleted");
+                    System.out.println("\tare you sure? (y/n): ");
+                    String ans = in.readLine();
+                    while(!ans.equals("n") && !ans.equals("y") )
+                    {
+                        System.out.println("\tError: invalid answer (y/n): ");
+                        ans = in.readLine();
+                    }
+                    //if no, then don't delete from contact list and return.
+                    if( ans.equals("n"))
+                    {
+                        return;
+                    }
+	
+						String update = String.format("delete from CHAT where chat_id = '%s' ", chat.get(0));
+    					esql.executeUpdate(update);
+   						System.out.println("Delete Successful");
+				}
+				return;
+
+	    }catch (Exception e)
+    	{
+	    	System.err.println(e.getMessage());
+    	}
+   }//end NewMessage
+
 
    public static void cMessage(Messenger esql, aUser au, int depth, List<String> chat_id){
         try{
