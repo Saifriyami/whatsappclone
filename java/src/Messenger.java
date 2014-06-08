@@ -457,6 +457,7 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                                         System.out.print(subsubTitle2 + "\n\t\t");
                                         printDashes(subsubTitle2.length());
                                         System.out.println("\n");
+										cChat(esql,au);
                                         //TODO: INITIALIZE A NEW CHAT WITH AUTHORIZED USER AS THE INITIAL SENDER
                                         //      ASK THE AUTHORIZED USER TO INPUT MEMBERS OF THIS USER LIST
                                         //      *ERROR* IF USER INPUTS NON-EXISTANT USERS, BLOCKED USER OR AUTHORIZED USER IS BLOCKED BY OTHER USERS
@@ -804,35 +805,6 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
             System.err.println(e.getMessage());
         }
    }//end ListContacts
-/*
-        public static void NewMessage(Messenger esql, aUser au)
-
-            try{
-                System.out.println("Enter The names of whom you wish to message(enter empty when done)");
-                String[] reciv;
-                int rtotal = 0;
-                String r = in.readLine();
-                while(!r.equals(""))
-                {
-                    reciv.add(r);
-                    rtotal = rtotal + 1;
-                    r = in.readLine();
-                }
-                if(rtotal == 0)
-                {
-                    System.out.println("Nobody to message back to menu");
-                    return;
-                }
-                //query to search if there is a chat with all of them
-                //TODO idea: narrow down to count(*) of chats with au.login
-                //very expensive to continue
-                String query = String.format("select chat_id from chat_list where count(chat_id) = '%s'");
-         
-            }catch (Exception e) {
-                System.err.println(e.getMessage());
-            }
-   }//end
-*/
 
    public static void NewMessage(Messenger esql, aUser au){
         try{
@@ -897,7 +869,7 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 					hit = possible.get(i).get(0);
 				}
 			}
-			// 
+			// if no hit is found / no existing chat
 			if(hit.equals(""))
 			{
 				String type = "private";
@@ -934,6 +906,46 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 			}
 
 			//assume have msg now
+			//add media attchment
+			ArrayList<String> arr = new ArrayList<String>();
+			System.out.println("Do you want media attchments? (y/n)");
+			String ans3 = in.readLine();
+			while(!ans3.equals("y") && !ans3.equals("n"))
+			{
+				System.out.println("This is (y/n) only");
+				ans3 = in.readLine();
+			}
+			while(ans3.equals("y"))
+			{
+				//add them
+				System.out.println("attatchment type? :");
+				String atype = in.readLine();
+				while(atype.equals(""))
+				{
+					System.out.println(" empty is not valid");
+					atype = in.readLine();
+				}
+				System.out.println("URL? :");
+				String url = in.readLine();
+				while(url.equals(""))
+				{
+					System.out.println(" empty is not valid");
+					url = in.readLine();
+				}
+				//insert into arr
+				arr.add(atype);
+				arr.add(url);
+				
+				System.out.println("Do you want more media attchments? (y/n)");
+				ans3 = in.readLine();
+				while(!ans3.equals("y") && !ans3.equals("n"))
+				{
+					System.out.println("This is (y/n) only");
+					ans3 = in.readLine();
+				}
+		
+			}
+
 			// get if they want destr_timestamp
 			System.out.println("Do you want destruction time? (y/n)");
 			String ans2 = in.readLine();
@@ -966,10 +978,25 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 				// TODO Temp fix need to come back 
 				tsd = new Timestamp((long) 111111111); 
 			}
-			String mm = String.format("insert into Message( msg_text, msg_timestamp, destr_timestamp,sender_login,chat_id) Values( '%s', '%s', '%s', '%s', '%s')", msg, ts, tsd, au.login, hit); 
+			String mm = String.format("insert into Message( msg_text, msg_timestamp, destr_timestamp,sender_login,chat_id) Values( '%s', '%s', '%s', '%s', %s)", msg, ts, tsd, au.login, hit); 
        		esql.executeUpdate(mm);
+			int m_id = esql.getCurrSeqVal("message_msg_id_seq");
+
 
 			System.out.println("Message is made");
+
+			//insert into media attachment table 
+			for(int y = 0; y < arr.size(); y = y+ 2)
+			{
+				String aUpdate = String.format("insert into MEDIA_ATTACHMENT(media_type, URL, msg_id) values('%s', '%s', '%s');",arr.get(y), arr.get(y+1), m_id);
+				esql.executeUpdate(aUpdate);
+			}
+			if(arr.size() >= 2)
+			{
+				System.out.println("Attachments are now added");
+			}
+
+
 			return;
 
 			
@@ -989,6 +1016,216 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 	    	System.err.println(e.getMessage());
     	}
    }//end temp
+
+ public static void cChat(Messenger esql, aUser au){
+        try{
+			System.out.println("Enter The names of whom you wish to message(enter empty when done)");
+			ArrayList<String> reciv = new ArrayList<String>();
+			reciv.add(au.login);
+			int rtotal = 0;
+			String r = in.readLine();
+			while(!r.equals(""))
+			{
+				//check if usr exists
+				String ue = String.format("select * from usr where login = '%s'", r);
+				int uc = esql.executeQuery(ue);
+				if(uc == 0)
+				{
+					System.out.println("User does not exist");
+				}
+				else
+				{
+					// check if blocked
+					String cb = String.format("select * from USER_LIST_CONTAINS where list_member ='%s' and list_id = '%s' ", r, au.block_list);
+					int cc = esql.executeQuery(cb);
+					if(cc == 1)
+					{
+						System.out.println("He is blocked");
+					}
+					else
+					{
+						reciv.add(r);
+						rtotal = rtotal +1;
+					}
+					
+				}
+				r = in.readLine();
+			}
+			if(rtotal == 0)
+			{
+				System.out.println("Nobody to message back to menu");
+				return;	
+			}
+			//query for an existing chat
+			String ec = String.format("select chat_id from (select * from CHAT_LIST where member = '%s') as c group by c.chat_id having count(*) = '%s' ",au.login, rtotal );
+			List<List<String>> possible = esql.executeQueryResult(ec);
+			// check if any of the possbile have all the pl of the message as recipients
+			String hit = "";
+			for(int i = 0; i < possible.size() && hit.equals(""); i++)
+			{
+				int count = 1;
+				for(int j = 0; j <reciv.size() && count == 1; j++)
+				{
+					//query to see they exist in chat_list
+					String ecl = String.format("select * from CHAT_LIST where member = '%s' and chat_id = '%s'" , reciv.get(j), possible.get(i).get(0));
+					int ecn = esql.executeQuery(ecl);
+					if(ecn == 0)
+					{
+						count = 0;
+					}
+				}
+				if(count == 1)
+				{
+					hit = possible.get(i).get(0);
+				}
+			}
+			// if no hit is found / no existing chat
+			if(hit.equals(""))
+			{
+				String type = "private";
+				if(reciv.size() > 2)
+				{
+					type = "group";
+				}
+				// didn't find chat make new chat
+				System.out.println("Making new chat ");
+				String eu = String.format("insert into CHAT(chat_type, init_sender) Values('%s', '%s')", type, au.login); 
+        		esql.executeUpdate(eu);
+         		int chat_id = esql.getCurrSeqVal("chat_chat_id_seq");
+				System.out.println("chat made");
+
+	
+				// add all
+				for(int x = 0; x < reciv.size(); x++)
+				{
+					String adda = String.format("insert into CHAT_LIST(chat_id,member) values('%s', '%s')", chat_id, reciv.get(x));
+					esql.executeUpdate(adda);
+					System.out.println("new chat_list made");
+				}
+				hit = String.format("'%s'",chat_id);
+			}
+			else{
+					System.out.println("Chat with these members already exist");
+					return;
+			}
+			//get message
+			System.out.println("Type your message");
+			String msg = in.readLine();
+			while(msg.equals(""))
+			{
+				System.out.println("must have a msg");
+				msg = in.readLine();
+			}
+
+			//assume have msg now
+
+			//add media attchment
+			ArrayList<String> arr = new ArrayList<String>();
+			System.out.println("Do you want media attchments? (y/n)");
+			String ans3 = in.readLine();
+			while(!ans3.equals("y") && !ans3.equals("n"))
+			{
+				System.out.println("This is (y/n) only");
+				ans3 = in.readLine();
+			}
+			while(ans3.equals("y"))
+			{
+				//add them
+				System.out.println("attatchment type? :");
+				String atype = in.readLine();
+				while(atype.equals(""))
+				{
+					System.out.println(" empty is not valid");
+					atype = in.readLine();
+				}
+				System.out.println("URL? :");
+				String url = in.readLine();
+				while(url.equals(""))
+				{
+					System.out.println(" empty is not valid");
+					url = in.readLine();
+				}
+				//insert into arr
+				arr.add(atype);
+				arr.add(url);
+				
+				System.out.println("Do you want more media attchments? (y/n)");
+				ans3 = in.readLine();
+				while(!ans3.equals("y") && !ans3.equals("n"))
+				{
+					System.out.println("This is (y/n) only");
+					ans3 = in.readLine();
+				}
+		
+			}
+
+			// get if they want destr_timestamp
+			System.out.println("Do you want destruction time? (y/n)");
+			String ans2 = in.readLine();
+			while(!ans2.equals("y") && !ans2.equals("n"))
+			{
+				System.out.println("This is (y/n) only");
+				ans2 = in.readLine();
+			}
+			Timestamp tsd = null;
+
+			if(ans2.equals('y'))
+			{
+				System.out.println("How many milliseconds? (1hr:3,600,000) (min:60,000) (seconds:1000) :");
+				long mil = readChoice();
+				if( mil < 100)
+				{
+					System.out.println("minimum is 100 milliseconds");
+					mil = readChoice();
+				}
+				tsd = new Timestamp(mil);
+			}
+			//got destr if needed
+			Date date = new Date();
+			Timestamp ts = new Timestamp(date.getTime());
+
+			//make message
+			System.out.println("Making Message ");
+			if(tsd == null)
+			{
+				// TODO Temp fix need to come back 
+				tsd = new Timestamp((long) 11111111); 
+			}
+			System.out.println("wtf");
+			String mm = String.format("insert into Message( msg_text, msg_timestamp, destr_timestamp,sender_login,chat_id) Values( '%s', '%s', '%s', '%s', %s);", msg, ts, tsd, au.login, hit);
+			System.out.println(mm); 
+       		esql.executeUpdate(mm);
+			int m_id = esql.getCurrSeqVal("message_msg_id_seq");
+
+
+			System.out.println("Message is made");
+
+			//insert into media attachment table 
+			for(int y = 0; y < arr.size(); y = y+ 2)
+			{
+				String aUpdate = String.format("insert into MEDIA_ATTACHMENT(media_type, URL, msg_id) values('%s', '%s', '%s');",arr.get(y), arr.get(y+1), m_id);
+				esql.executeUpdate(aUpdate);
+			}
+			if(arr.size() >= 2)
+			{
+				System.out.println("Attachments are now added");
+			}
+
+
+			return;
+
+
+			
+
+
+
+			
+	    }catch (Exception e)
+    	{
+	    	System.err.println(e.getMessage());
+    	}
+   }//end temp
+
 
 
 public static void DeleteMessage(Messenger esql, aUser au, List<String> message)
@@ -1110,11 +1347,10 @@ public static int NewMessageChat(Messenger esql, aUser au)
 */
    public static int loadL(Messenger esql, aUser au, int depth, List<String> chat){
         try{
-			//look if going to next page violates size
-			String sizec = String.format("select * from MESSAGE where chat_id = '%s'", chat.get(0));
-			int size = esql.executeQuery(sizec);
-            System.out.println("THIS IS THE NUMBER OF MESSAGES CURRENTLY: " + size);
-			if( size > depth*10)
+			int offset = (depth+1) * 10;
+			String tenM = String.format("select * from MESSAGE where chat_id = '%s' order by msg_timestamp DESC Limit 10 offset '%s' ", chat.get(0), offset);
+			int snum = esql.executeQuery(tenM);
+			if( snum > 0)
 			{
 				System.out.println("Going to next 10");
 				return depth +1;
