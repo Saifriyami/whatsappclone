@@ -295,56 +295,15 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                              */
                             String subTitle1 = "\tNotifications List\n\t";
                             System.out.print(subTitle1);
-                            System.out.println("CALL ReadNotifications(esql, au) ");
+                            printDashes(subTitle1.length());
+                            System.out.println();
 							ReadNotifications(esql, au);
                             break;
                         case 2: //viewing chats
                              /*  
                              *  List all chats of authorized user
-
-                             * Method to list current 10 chats or view a chat's details. 
-                             *
-                             * @param Messenger esql: to execute and update queries.
-                             * @param aUser au: authorized user's information
-                             * @param int choice: value to determine prev/next 10 chats or to select a chat
-                             * @param int position: value of the starting position of a 10 chat group
-                             * @return current value of a sequence
-                             * @throws java.sql.SQLException when failed to execute the query
-        
-                             *  public static int BrowseChats(Messenger esql, aUser au, int choice, int position); not yet defined
-                             *  Each chat should print like this:
-                             *  ------------------------------
-                             *  chat_id: 0                     
-                             *  recipients: twang033, Jimmy
-                             *  ------------------------------
-                             *  .
-                             *  .
-                             *  .
-                             *  ------------------------------
-                             *  chat_id: 9
-                             *  recipients: Jimmy
-                             *  ------------------------------
-                             *  If choice == 1
-                             *      show list of chats as options in a sub-menu
-                             * 
-                             *  If choice == 2 or 3
-                             *      show list of prev/next 10 chats
-                             *  ------------------------------
-                             *  1. chat_id: 0                     
-                             *     recipients: twang033, Jimmy
-                             *  ------------------------------
-                             *  . 
-                             *  .
-                             *  .
-                             *  ------------------------------
-                             *  9. chat_id: 9
-                             *     recipients: Jimmy
-                             *  ------------------------------
-                             * I propose a wrapper function where we have "ListChats" function that only take
-                             * in the current 10 chats and we use that list as the 10 that we use for selecting
-                             * a chat.
-                             * 
                              */
+
                             //chat list
                             int chat_pos = 0;
                             boolean viewing_chat_list = true;
@@ -358,21 +317,18 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 								chats = printChats(esql, au);
                                 System.out.println("\n\t1. Select a Chat");
                                 System.out.println("\t2. New Chat");
-                                System.out.println("\t3. Delete Chat");
-                                System.out.println("\t4. Add member/s to a chat");
-                                System.out.println("\t5. Delete member/s from a chat");
-                                System.out.println("\t9. Go back to main menu");
+                                System.out.print("\t9. Go back to main menu\n\t");
 
                                 switch(readChoice())
                                 {
                                     case 1: //choose a chat -- list messaging options
-										if(chats == null)
+										if(chats == null || chats.size() == 0)
 										{
-											System.out.println("You have no chats");
+											System.out.println("\tYou have no chats\n");
 											break;	
 										}
 
-										System.out.print("\n\n\tWhat number is the chat you want? :");
+										System.out.print("\n\n\tWhat number is the chat you want?\n\t");
 										int cnum = readChoice();
 										while(cnum <= 0 || cnum > chats.size())
 										{
@@ -393,7 +349,7 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                                         while(viewing_chat)
                                         {
 											String subSubTitle1 = "\n\t\tChat Title";
-											System.out.print(subSubTitle1 + "\n\t");
+											System.out.print(subSubTitle1 + "\n\t\t");
                                             printDashes(subSubTitle1.length());
 
                                             //TODO: BEFORE OUTPUTTING OPTIONS, PRINT MESSAGES IN CHRONOLOGICAL ORDER BASED ON CREATION DATE
@@ -403,8 +359,10 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                                             System.out.println("\t\t3. New Message"); //send notification
                                             System.out.println("\t\t4. Delete Message"); //send notification
                                             System.out.println("\t\t5. Edit Message"); //send notification
-                                            System.out.println("\t\t8. Back to chat list");
-                                            System.out.println("\t\t9. Back to main menu");
+                                            System.out.println("\t\t6. Add member/s to chat");
+                                            System.out.println("\t\t7. Delete member/s from chat");
+                                            System.out.println("\t\t8. Delete this chat");
+                                            System.out.println("\t\t9. Back to chat list");
                                             //TODO: EACH MESSAGE SHOULD LOOK LIKE THIS
                                             /*-------------------------------------------------------------------
                                              *  Author:                         Creation Date:
@@ -450,44 +408,41 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                                                     //      AND INDENT THE NEWLY EDITED MESSAGE TO SEE THE NEW CHANGE. 
                                                     System.out.print("\t\tEdited your own message\n\n");
                                                     break;
-                                                case 8: //Go back to chat list
-                                                    viewing_chat = false;
+                                                case 6: //add member/s to a chat
+                                                    //TODO: PRINT LIST OF CHATS AND CHOOSE WHICH CHAT TO ADD MEMBER/MEMBERS TO CHAT
+                                                    //      UPDATES ALL USERS' CHATS
+                                                    //      ERROR IF USER INPUTS NON-EXISTANT USER OR BLOCKED USER OR AUTHORIZED USER IS BLOCKED BY OTHER USERS
+                                                    break;
+                                                case 7: //delete member/s to a chat
+                                                    //TODO: PRINT LIST OF CHATS AND CHOOSE WHICH CHAT TO ADD MEMBER/MEMBERS FROM CHAT
+                                                    //      UPDATEs ALL USERS' CHATS
+                                                    //      ERROR IF USER INPUTS NON-EXISTANT USER
+                                                    break;
+                                                case 8: //delete a chat
+                                                    String subsubTitle3 = "\t\tDelete a chat";
+                                                    System.out.print(subsubTitle3 + "\n\t\t");
+                                                    printDashes(subsubTitle3.length());
+                                                    System.out.println();
+                                                    //TODO: PRINT LIST OF CHATS AND CHOOSE WHICH CHAT TO DELETE
+                                                    //      LIST OF CHATS WILL BE DISPLAYED WITH USER OPTIONS (USE A SWITCH STATEMENT)
                                                     break;
                                                 case 9: //Go back to main menu
                                                     viewing_chat = false;
-                                                    viewing_chat_list = false;
                                                     break;
                                                 default:
                                                     System.out.println("Unrecognized Choice!");
                                                     break;
                                             }//end viewing_chat switch
-                                           
                                         }//end viewing_chat while
                                         break;
                                     case 2: //create a new chat
                                         String subsubTitle2 = "\t\tCreate a new chat";
-                                        System.out.println(subsubTitle2 + "\n\t");
+                                        System.out.print(subsubTitle2 + "\n\t\t");
                                         printDashes(subsubTitle2.length());
+                                        System.out.println("\n");
                                         //TODO: INITIALIZE A NEW CHAT WITH AUTHORIZED USER AS THE INITIAL SENDER
                                         //      ASK THE AUTHORIZED USER TO INPUT MEMBERS OF THIS USER LIST
                                         //      *ERROR* IF USER INPUTS NON-EXISTANT USERS, BLOCKED USER OR AUTHORIZED USER IS BLOCKED BY OTHER USERS
-                                        break;
-                                    case 3: //delete a chat
-                                        String subsubTitle3 = "\t\tDelete a chat";
-                                        System.out.println(subsubTitle3 + "\n\t");
-                                        printDashes(subsubTitle3.length());
-                                        //TODO: PRINT LIST OF CHATS AND CHOOSE WHICH CHAT TO DELETE
-                                        //      LIST OF CHATS WILL BE DISPLAYED WITH USER OPTIONS (USE A SWITCH STATEMENT)
-                                        break;
-                                    case 4: //add member/s to a chat
-                                        //TODO: PRINT LIST OF CHATS AND CHOOSE WHICH CHAT TO ADD MEMBER/MEMBERS TO CHAT
-                                        //      UPDATES ALL USERS' CHATS
-                                        //      ERROR IF USER INPUTS NON-EXISTANT USER OR BLOCKED USER OR AUTHORIZED USER IS BLOCKED BY OTHER USERS
-                                        break;
-                                    case 5: //delete member/s to a chat
-                                        //TODO: PRINT LIST OF CHATS AND CHOOSE WHICH CHAT TO ADD MEMBER/MEMBERS FROM CHAT
-                                        //      UPDATEs ALL USERS' CHATS
-                                        //      ERROR IF USER INPUTS NON-EXISTANT USER
                                         break;
                                     case 9: //Go back to main menu
                                         viewing_chat_list = false;
@@ -509,8 +464,8 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                             System.out.println(subTitle3);
                             System.out.print("\t");
                             printDashes(subTitle3.length());
+                            System.out.println("\n");
 
-                            usermenu = false;
                             break;
                         case 4: //settings
                             String subTitle4 = "\tSettings";
@@ -521,7 +476,7 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                             boolean settings = true;
                             while(settings)
                             {
-								System.out.println("\n\t1. edit profile");
+								System.out.println("\n\t1. Edit profile");
 								System.out.println("\t2. manage contacts");
 								System.out.println("\t3. delete account");
 								System.out.println("\t9. back to main menu");
@@ -579,19 +534,12 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 											break;
                                     case 3: //delete profile
                                         break;
-                                    case 4: 
-                                        break;
-                                    case 5:
-                                        break;
-                                    case 6:
-                                        break;
+
                                     case 9: //log out
                                         settings = false;
                                         break;
                                     default:
                                         System.out.println("\t\tUnrecognized choice!");
-						
-
                                 }//end settings switch
                             } //end settings while
                             break;
@@ -892,9 +840,9 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 			{
 				int temp = i+1;
 				//TODO formatting
-				System.out.println("\t\t\t" + temp + ")");
-				System.out.println("\t\t\tAuthor: " + m.get(i).get(4));
-				System.out.println("\t\t\tCreation Date: " + m.get(i).get(2));
+				System.out.println("\t\t" + temp + ")");
+				System.out.println("\t\tAuthor: " + m.get(i).get(4));
+				System.out.println("\t\tCreation Date: " + m.get(i).get(2));
 				System.out.println("Text: " + m.get(i).get(1));
 					
 			}
@@ -943,12 +891,12 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
      	try{
 			String get_msg_id = String.format("select msg_id from NOTIFICATION where usr_login = '%s'", au.login);
 			List< List<String>> n_message_id = esql.executeQueryResult(get_msg_id);
-
-			if(n_message_id == null)
+			if(n_message_id == null || n_message_id.size() == 0)
 			{
-				System.out.println("\tYou have no new notifications");
+				System.out.println("\tYou have no new notifications\n");
 				return;
 			}
+            //System.out.println(n_message_id.get(0));
 			
 			//currently prints out all notifications in one go 
 			for(int i = 0; i < n_message_id.size(); i++)
