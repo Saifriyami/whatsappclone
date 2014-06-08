@@ -944,7 +944,7 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
         try{
 			//query for 10 chats in depth range 
 			int offset = (depth*10);
-			String tenM = String.format("select * from MESSAGE where chat_id = '%s' order by msg_timestamp Limit 10 offset '%s' ", chat_id.get(0), offset);
+			String tenM = String.format("select * from MESSAGE where chat_id = '%s' order by msg_timestamp DESC Limit 10 offset '%s' ", chat_id.get(0), offset);
 			List<List<String>> m = esql.executeQueryResult(tenM);
 			if( m == null)
 			{
@@ -955,11 +955,25 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 			for(int i = 0; i < m.size(); i++)
 			{
 				int temp = i+1;
+				int go = 1;
 				//TODO formatting
 				System.out.println("\t\t" + temp + ")");
 				System.out.println("\t\tAuthor: " + m.get(i).get(4));
 				System.out.println("\t\tCreation Date: " + m.get(i).get(2));
 				System.out.println("Text: " + m.get(i).get(1));
+				String att_look = String.format("select media_type, URL from MEDIA_ATTACHMENT where msg_id = '%s' ", chat_id.get(0));
+				List<List<String>> aQ = esql.executeQueryResult(att_look);
+				if(aQ.size() == 0 || aQ == null)
+				{
+					go = 0;
+				}
+				for(int j = 0; j < aQ.size() && go == 1; j++)
+				{
+					System.out.print("Media type: ");
+					System.out.println(aQ.get(j).get(0));
+					System.out.print("URL :");
+					System.out.println(aQ.get(j).get(1));
+				}
 					
 			}
 			return;
@@ -973,7 +987,7 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 		List<List<String>> temp = null;
         try{
 			// Get all the chats user has membership of and find most current 
-				String c_time = String.format("select * from (select m.chat_id, MAX(m.msg_timestamp) as msg_timestamp from MESSAGE m,(select chat_id from CHAT_LIST where member = '%s') as c where c.chat_id = m.chat_id group by m.chat_id ) as id_t order by id_t.msg_timestamp", au.login);  
+				String c_time = String.format("select * from (select m.chat_id, Max(m.msg_timestamp) as msg_timestamp from MESSAGE m,(select chat_id from CHAT_LIST where member = '%s') as c where c.chat_id = m.chat_id group by m.chat_id ) as id_t order by id_t.msg_timestamp DESC", au.login);  
  
 	    	temp = esql.executeQueryResult(c_time);
 			System.out.println("");
