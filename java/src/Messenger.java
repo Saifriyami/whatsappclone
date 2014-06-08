@@ -261,6 +261,7 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
             System.out.println();
             String authorisedUser = null;
 			aUser au = null;
+			int pUpdate = 0;
             switch (readChoice()){
                case 1: CreateUser(esql); break;
                case 2: authorisedUser = LogIn(esql);
@@ -277,9 +278,24 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
             //user menu
                 boolean usermenu = true;
 
-                String userTitle = au.login + "'s Menu"; 
-                while(usermenu) {
-                    System.out.println(userTitle);
+                String userTitle = au.login + "'s Menu";
+				String userS = "";
+				int sint = 0;
+	            while(usermenu) {
+    				if(au.status != null)
+					{
+						sint = 1;	
+					}
+					if(pUpdate == 1)
+					{
+						au = new aUser(esql, authorisedUser);
+						pUpdate = 0;
+					} 
+	                System.out.println(userTitle);
+					if(sint == 1)
+					{
+						System.out.println(au.status);
+					}
                     printDashes(userTitle.length());
                     System.out.println();
                     System.out.println("1. View Notifications");
@@ -495,14 +511,16 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                             boolean settings = true;
                             while(settings)
                             {
-								System.out.println("\n\t1. Edit profile");
+								System.out.println("\n\t1. Edit Status");
 								System.out.println("\t2. manage contacts");
 								System.out.println("\t3. delete account");
 								System.out.println("\t9. back to main menu");
 		
                                 switch(readChoice())
                                 {
-                                    case 1: //edit profile
+                                    case 1: //edit status
+										au.login = eStatus(esql, au);
+										pUpdate = 1;
                                         break;
                                     case 2: //manage contacts
 											//print menu to console
@@ -1015,6 +1033,32 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
     	{
 	    	System.err.println(e.getMessage());
     	}
+   }//end temp
+
+ public static String eStatus(Messenger esql, aUser au){
+        String msg = "";
+		try{
+			//acquire status
+			System.out.println("Type your status: ");
+			msg = in.readLine();
+			while(msg.equals(""))
+			{
+				System.out.println("must have a status");
+				msg = in.readLine();
+			}
+
+			// insert
+			String update = String.format("update USR set status = '%s' where login = '%s'", msg, au.login);
+			esql.executeUpdate(update);
+			System.out.println("status changed");
+
+			
+	    }catch (Exception e)
+    	{
+	    	System.err.println(e.getMessage());
+    	}
+		return msg;
+	
    }//end temp
 
  public static void cChat(Messenger esql, aUser au){
