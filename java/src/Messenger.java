@@ -1794,8 +1794,7 @@ public static int NewMessageChat(Messenger esql, aUser au)
 				System.out.println(msg_i.get(0).get(0));
 				//assuming it is now considered read delete from Notifications
 				String msg_d = String.format("delete from NOTIFICATION where user_login = '%s' and msg_id = '%s'", au.login, n_message_id.get(i).get(0));
-				System.out.println("\n " + msg_d);
-				//esql.executeUpdate(msg_d);
+				esql.executeUpdate(msg_d);
 				}
 			}
 			
