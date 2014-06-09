@@ -312,7 +312,8 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                              *   List all notifications of authorized user
                              *   public static void ReadNotifications(Messenger esql, aUser au); (already declared below)
                              */
-                            String subTitle1 = "\tNotifications List\n\t";
+                            //CHANGE :) delete tab, add \n
+                            String subTitle1 = "\nNotifications List\n";
                             System.out.print(subTitle1);
                             printDashes(subTitle1.length());
                             System.out.println();
@@ -923,7 +924,7 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 					esql.executeUpdate(adda);
 					System.out.println("new chat_list made");
 				}
-				hit = String.format("'%s'",chat_id);
+				hit = String.format("%s",chat_id);
 			}
 			// here on hit is chat_id
 			
@@ -1439,7 +1440,7 @@ public static void EditMessage(Messenger esql, aUser au, List<String> message)
 					String adda = String.format("insert into CHAT_LIST(chat_id,member) values('%s', '%s')", chat_id, reciv.get(x));
 					esql.executeUpdate(adda);
 				}
-				hit = String.format("'%s'",chat_id);
+				hit = String.format("%s",chat_id);
 			}
 			else{
 					System.out.println("Chat with these members already exist");
@@ -1552,7 +1553,7 @@ public static void EditMessage(Messenger esql, aUser au, List<String> message)
 			// add all
 				for(int x = 0; x < reciv.size(); x++)
 				{
-					String adda = String.format("insert into NOTIFICATION(user_login, msg_id) values('%s', '%s')", m_id, reciv.get(x));
+					String adda = String.format("insert into NOTIFICATION(usr_login, msg_id) values('%s', '%s')", m_id, reciv.get(x));
 					esql.executeUpdate(adda);
 				}
 
@@ -1818,14 +1819,14 @@ public static int NewMessageChat(Messenger esql, aUser au)
 			{
 				int temp = i+1;
 				int go = 1;
-				//TODO formatting
-				System.out.println("" + temp + ")");
+				//CHANGE :) removed tabbing
+				System.out.println(temp + ")");
 				System.out.println("Author: " + m.get(i).get(4));
 				System.out.println("Creation Date: " + m.get(i).get(2));
-                System.out.println();
 				System.out.println("Text: " + m.get(i).get(1));
-				String att_look = String.format("select media_type, URL from MEDIA_ATTACHMENT where msg_id = '%s' ", chat_id.get(0));
+				String att_look = String.format("select media_type, URL from MEDIA_ATTACHMENT where msg_id = '%s' ", m.get(i).get(0));
 				List<List<String>> aQ = esql.executeQueryResult(att_look);
+                System.out.println("SIZE OF AQ: " + aQ.size());
 				if(aQ.size() == 0 || aQ == null)
 				{
 					go = 0;
@@ -1839,7 +1840,6 @@ public static int NewMessageChat(Messenger esql, aUser au)
 				}
 					
 			}
-            printDashes(20);
 			return m;
 	    }catch (Exception e)
     	{
@@ -1888,7 +1888,7 @@ public static int NewMessageChat(Messenger esql, aUser au)
 			List< List<String>> n_message_id = esql.executeQueryResult(get_msg_id);
 			if(n_message_id == null || n_message_id.size() == 0)
 			{
-				System.out.println("\tYou have no new notifications\n");
+				System.out.println("You have no new notifications\n");
 				return;
 			}
             //System.out.println(n_message_id.get(0));
@@ -1906,7 +1906,7 @@ public static int NewMessageChat(Messenger esql, aUser au)
 				{
 				System.out.println(msg_i.get(0).get(0));
 				//assuming it is now considered read delete from Notifications
-				String msg_d = String.format("delete from NOTIFICATION where user_login = '%s' and msg_id = '%s'", au.login, n_message_id.get(i).get(0));
+				String msg_d = String.format("delete from NOTIFICATION where usr_login = '%s' and msg_id = '%s'", au.login, n_message_id.get(i).get(0));
 				esql.executeUpdate(msg_d);
 				}
 			}
