@@ -407,6 +407,9 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                                                     //IF MEDIA ATTACHMENT OR URL IS ATTACHED TO MESSAGE, THEN DISPLAY THAT ATTACHEMENT/ URL TOO
                                                     //UPDATE AFFECTS ALL OTHER USERS' CHATS IN THEIR CHAT LIST
                                                     System.out.println("\t\tCreated a new Message\n\n");
+                                                    
+                                                    ChatNewMessage(esql, au, chats.get(cnum).get(0));
+
                                                     break;
                                                 case 4: //Delete your own message
                                                     //TODO: AUTHORIZED USER CAN ONLY DELETE THEIR OWN MESSAGES
@@ -1006,10 +1009,7 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 				// TODO Temp fix need to come back 
 				tsd = new Timestamp((long) 111111111); 
 			}
-			else
-			{
 				tsd = new Timestamp(ts.getTime() + tsd.getTime());
-			}
 
 			String mm = String.format("insert into Message( msg_text, msg_timestamp, destr_timestamp,sender_login,chat_id) Values( '%s', '%s', '%s', '%s', %s)", msg, ts, tsd, au.login, hit); 
        		esql.executeUpdate(mm);
@@ -1054,7 +1054,7 @@ public static void ChatNewMessage(Messenger esql, aUser au, String chat_id)
     try{
         //Find chat_id in list of chats with all the members to create a message
         String query_chat_members = String.format("SELECT member FROM CHAT_LIST WHERE chat_id = '%s'", chat_id);
-        List<List<String>> members = executeQueryResult(query_chat_members);
+        List<List<String>> members = esql.executeQueryResult(query_chat_members);
    
         // here on hit is chat_id
        
@@ -1140,10 +1140,7 @@ public static void ChatNewMessage(Messenger esql, aUser au, String chat_id)
             // TODO Temp fix need to come back
             tsd = new Timestamp((long) 111111111);
         }
-        else
-        {
             tsd = new Timestamp(ts.getTime() + tsd.getTime());
-        }
 
         String mm = String.format("insert into Message( msg_text, msg_timestamp, destr_timestamp,sender_login,chat_id) Values( '%s', '%s', '%s', '%s', %s)", msg, ts, tsd, au.login, chat_id);
            esql.executeUpdate(mm);
@@ -1182,6 +1179,7 @@ public static void EditMessage(Messenger esql, aUser au, List<String> message)
 {
     try{
         String m_id = message.get(0);
+        System.out.println("MESSAGE ID: " + m_id);
         //query for the author of message and the au
         String query = String.format("SELECT sender_login FROM MESSAGE WHERE msg_id = '%s' AND sender_login = '%s'", m_id, au.login);   
         int rows = esql.executeQuery(query);
@@ -1193,16 +1191,16 @@ public static void EditMessage(Messenger esql, aUser au, List<String> message)
         else
         {
                 //edit the text field of a message
-                System.out.println("EDIT YOUR OLD MESSAGE");
                 System.out.println("Text: " );
                 String input = in.readLine();
-                System.out.println("FINISHED READING INPUT");
                 String update = String.format("UPDATE MESSAGE SET msg_text = '%s' WHERE msg_id = '%s' AND sender_login = '%s'", input, m_id, au.login);
                 esql.executeUpdate(update);
                
                 //check if original message has any attachments
+                
                 String query1 = String.format("SELECT * FROM MEDIA_ATTACHMENT WHERE msg_id = '%s'", m_id);
                 List<List<String>> media_ids = esql.executeQueryResult(query1);
+                System.out.println("MEDIA_IDS: " + media_ids.size());
                 int rows1 = media_ids.size();
                 String ans;
                 if(rows1 == 0)
@@ -1530,10 +1528,7 @@ public static void EditMessage(Messenger esql, aUser au, List<String> message)
 				// TODO Temp fix need to come back 
 				tsd = new Timestamp((long) 11111111); 
 			}
-			else
-			{
 				tsd = new Timestamp(ts.getTime() + tsd.getTime());
-			}
 			String mm = String.format("insert into Message( msg_text, msg_timestamp, destr_timestamp,sender_login,chat_id) Values( '%s', '%s', '%s', '%s', %s);", msg, ts, tsd, au.login, hit);
 			System.out.println(mm); 
        		esql.executeUpdate(mm);
@@ -1824,9 +1819,10 @@ public static int NewMessageChat(Messenger esql, aUser au)
 				int temp = i+1;
 				int go = 1;
 				//TODO formatting
-				System.out.println("\t\t" + temp + ")");
-				System.out.println("\t\tAuthor: " + m.get(i).get(4));
-				System.out.println("\t\tCreation Date: " + m.get(i).get(2));
+				System.out.println("" + temp + ")");
+				System.out.println("Author: " + m.get(i).get(4));
+				System.out.println("Creation Date: " + m.get(i).get(2));
+                System.out.println();
 				System.out.println("Text: " + m.get(i).get(1));
 				String att_look = String.format("select media_type, URL from MEDIA_ATTACHMENT where msg_id = '%s' ", chat_id.get(0));
 				List<List<String>> aQ = esql.executeQueryResult(att_look);
@@ -1843,6 +1839,7 @@ public static int NewMessageChat(Messenger esql, aUser au)
 				}
 					
 			}
+            printDashes(20);
 			return m;
 	    }catch (Exception e)
     	{
