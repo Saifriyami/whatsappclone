@@ -570,6 +570,11 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 												} //end manageContacts while
 											break;
                                     case 3: //delete profile
+										if(dProfile(esql, au) == 1)
+										{
+											settings = false;
+											usermenu = false;
+										}
                                         break;
 
                                     case 9: //log out
@@ -1034,6 +1039,49 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 	    	System.err.println(e.getMessage());
     	}
    }//end temp
+
+ public static int dProfile(Messenger esql, aUser au){
+        try{
+			//check if there is linked info
+			String link = String.format("select * from CHAT where init_sender ='%s'", au.login);
+			int count = esql.executeQuery(link);
+			if(count != 0)
+			{
+				System.out.println("You are curretly initail sender of chats you cannot delete");
+				return 0;
+			}
+			String mlink = String.format("select * from Message where sender_login = '%s'", au.login);
+			count = esql.executeQuery(mlink);
+			if(count != 0)
+			{
+				System.out.println("You still have published content ie:messages cannot delete");
+				return 0;
+			}
+			System.out.println("Enter password :");
+			String pass = in.readLine();
+			while(pass.equals(""))
+			{
+				System.out.println("need a password");
+				pass = in.readLine();
+			}
+			String temp = au.password;
+			String p1 = temp.substring(0, temp.indexOf(' '));
+			if(!pass.equals(p1))
+			{
+				System.out.println("Wrong password cannot delete");
+				return 0;
+			}
+			System.out.println("Goodbye please try us again");
+			String update = String.format("delete from USR where login = '%s'", au.login);
+			esql.executeUpdate(update);
+			
+	    }catch (Exception e)
+    	{
+	    	System.err.println(e.getMessage());
+    	}
+		return 1;
+   }//end temp
+
 
  public static String eStatus(Messenger esql, aUser au){
         String msg = "";
