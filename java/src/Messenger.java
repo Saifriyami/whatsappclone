@@ -1049,15 +1049,133 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
     	}
    }//end NewMessage
 
-// use to make more function clones
- public static void temp(Messenger esql, aUser au){
-        try{
-			
-	    }catch (Exception e)
-    	{
-	    	System.err.println(e.getMessage());
-    	}
-   }//end temp
+public static void ChatNewMessage(Messenger esql, aUser au, String chat_id)
+{
+    try{
+        //Find chat_id in list of chats with all the members to create a message
+        String query_chat_members = String.format("SELECT member FROM CHAT_LIST WHERE chat_id = '%s'", chat_id);
+        List<List<String>> members = executeQueryResult(query_chat_members);
+   
+        // here on hit is chat_id
+       
+            //get message
+        System.out.println("Type your message");
+        String msg = in.readLine();
+        while(msg.equals(""))
+        {
+            System.out.println("must have a msg");
+            msg = in.readLine();
+        }
+
+        //assume have msg now
+        //add media attchment
+        ArrayList<String> arr = new ArrayList<String>();
+        System.out.println("Do you want media attchments? (y/n)");
+        String ans3 = in.readLine();
+        while(!ans3.equals("y") && !ans3.equals("n"))
+        {
+            System.out.println("This is (y/n) only");
+            ans3 = in.readLine();
+        }
+        while(ans3.equals("y"))
+        {
+            //add them
+            System.out.println("attatchment type? :");
+            String atype = in.readLine();
+            while(atype.equals(""))
+            {
+                System.out.println(" empty is not valid");
+                atype = in.readLine();
+            }
+            System.out.println("URL? :");
+            String url = in.readLine();
+            while(url.equals(""))
+            {
+                System.out.println(" empty is not valid");
+                url = in.readLine();
+            }
+            //insert into arr
+            arr.add(atype);
+            arr.add(url);
+           
+            System.out.println("Do you want more media attchments? (y/n)");
+            ans3 = in.readLine();
+            while(!ans3.equals("y") && !ans3.equals("n"))
+            {
+                System.out.println("This is (y/n) only");
+                ans3 = in.readLine();
+            }
+   
+        }
+
+        // get if they want destr_timestamp
+        System.out.println("Do you want destruction time? (y/n)");
+        String ans2 = in.readLine();
+        while(!ans2.equals("y") && !ans2.equals("n"))
+        {
+            System.out.println("This is (y/n) only");
+            ans2 = in.readLine();
+        }
+        Timestamp tsd = null;
+
+        if(ans2.equals("y"))
+        {
+            System.out.println("How many milliseconds? (1hr:3,600,000) (min:60,000) (seconds:1000) :");
+            long mil = readChoice();
+            if( mil < 100)
+            {
+                System.out.println("minimum is 100 milliseconds");
+                mil = readChoice();
+            }
+            tsd = new Timestamp(mil);
+        }
+        //got destr if needed
+        Date date = new Date();
+        Timestamp ts = new Timestamp(date.getTime());
+
+        //make message
+        System.out.println("Making Message ");
+        if(tsd == null)
+        {
+            // TODO Temp fix need to come back
+            tsd = new Timestamp((long) 111111111);
+        }
+        else
+        {
+            tsd = new Timestamp(ts.getTime() + tsd.getTime());
+        }
+
+        String mm = String.format("insert into Message( msg_text, msg_timestamp, destr_timestamp,sender_login,chat_id) Values( '%s', '%s', '%s', '%s', %s)", msg, ts, tsd, au.login, chat_id);
+           esql.executeUpdate(mm);
+        int m_id = esql.getCurrSeqVal("message_msg_id_seq");
+
+
+        System.out.println("Message is made");
+
+        //insert into media attachment table
+        for(int y = 0; y < arr.size(); y = y+ 2)
+        {
+            String aUpdate = String.format("insert into MEDIA_ATTACHMENT(media_type, URL, msg_id) values('%s', '%s', '%s');",arr.get(y), arr.get(y+1), m_id);
+            esql.executeUpdate(aUpdate);
+        }
+        if(arr.size() >= 2)
+        {
+            System.out.println("Attachments are now added");
+        }
+       
+        //notify all
+        for(int x = 0; x < members.get(0).size(); x++)
+        {
+            String adda = String.format("INSERT INTO NOTIFICATION(user_login, msg_id) values('%s', '%s')", m_id, members.get(0).get(x));
+            esql.executeUpdate(adda);
+        }
+            return;
+       
+    }catch (Exception e)
+    {
+        System.err.println(e.getMessage());
+    }
+}
 
 public static void EditMessage(Messenger esql, aUser au, List<String> message)
 
