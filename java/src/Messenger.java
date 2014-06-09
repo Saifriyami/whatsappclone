@@ -1322,7 +1322,6 @@ public static void EditMessage(Messenger esql, aUser au, List<String> message)
 				{
 					String adda = String.format("insert into CHAT_LIST(chat_id,member) values('%s', '%s')", chat_id, reciv.get(x));
 					esql.executeUpdate(adda);
-					System.out.println("new chat_list made");
 				}
 				hit = String.format("'%s'",chat_id);
 			}
@@ -1442,7 +1441,6 @@ public static void EditMessage(Messenger esql, aUser au, List<String> message)
 				{
 					String adda = String.format("insert into NOTIFICATION(user_login, msg_id) values('%s', '%s')", m_id, reciv.get(x));
 					esql.executeUpdate(adda);
-					System.out.println("new chat_list made");
 				}
 
 
