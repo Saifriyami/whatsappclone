@@ -924,7 +924,7 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 					esql.executeUpdate(adda);
 					System.out.println("new chat_list made");
 				}
-				hit = String.format("%s",chat_id);
+				hit = String.valueOf(chat_id);
 			}
 			// here on hit is chat_id
 			
@@ -1012,7 +1012,7 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 			}
 				tsd = new Timestamp(ts.getTime() + tsd.getTime());
 
-			String mm = String.format("insert into Message( msg_text, msg_timestamp, destr_timestamp,sender_login,chat_id) Values( '%s', '%s', '%s', '%s', %s)", msg, ts, tsd, au.login, hit); 
+			String mm = String.format("insert into MESSAGE( msg_text, msg_timestamp, destr_timestamp,sender_login,chat_id) Values( '%s', '%s', '%s', '%s', '%s')", msg, ts, tsd, au.login, hit); 
        		esql.executeUpdate(mm);
 			int m_id = esql.getCurrSeqVal("message_msg_id_seq");
 
@@ -1030,14 +1030,17 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 				System.out.println("Attachments are now added");
 			}
 
+			System.out.println("here");
 			//notify
 			// add all
-				for(int x = 0; x < reciv.size(); x++)
-				{
-					String adda = String.format("insert into NOTIFICATION(user_login, msg_id) values('%s', '%s')", m_id, reciv.get(x));
-					esql.executeUpdate(adda);
-					System.out.println("new chat_list made");
-				}
+
+			reciv.remove(au.login);
+			for(int x = 0; x < reciv.size(); x++)
+			{
+				String adda = String.format("insert into NOTIFICATION(usr_login, msg_id) values('%s', '%s')",  reciv.get(x), m_id);
+				esql.executeUpdate(adda);
+				System.out.println("new chat_list made");
+			}
 
 
 			return;
@@ -1164,7 +1167,7 @@ public static void ChatNewMessage(Messenger esql, aUser au, String chat_id)
         //notify all
         for(int x = 0; x < members.get(0).size(); x++)
         {
-            String adda = String.format("INSERT INTO NOTIFICATION(user_login, msg_id) values('%s', '%s')", m_id, members.get(0).get(x));
+            String adda = String.format("INSERT INTO NOTIFICATION(usr_login, msg_id) values('%s', '%s')",  members.get(0).get(x), m_id);
             esql.executeUpdate(adda);
         }
             return;
@@ -1826,7 +1829,6 @@ public static int NewMessageChat(Messenger esql, aUser au)
 				System.out.println("Text: " + m.get(i).get(1));
 				String att_look = String.format("select media_type, URL from MEDIA_ATTACHMENT where msg_id = '%s' ", m.get(i).get(0));
 				List<List<String>> aQ = esql.executeQueryResult(att_look);
-                System.out.println("SIZE OF AQ: " + aQ.size());
 				if(aQ.size() == 0 || aQ == null)
 				{
 					go = 0;
