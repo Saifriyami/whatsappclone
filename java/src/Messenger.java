@@ -247,6 +247,7 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
          String user = args[2];
          esql = new Messenger (dbname, dbport, user, "");
 
+
          boolean keepon = true;
          while(keepon) {
             // These are sample SQL statements
@@ -361,6 +362,10 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                                         printDashes(subSubTitle1.length());
                                         while(viewing_chat)
                                         {
+											//set delete interval
+											String interval = "DELETE FROM MESSAGE WHERE  not exists(select msg_id from NOTIFICATION where MESSAGE.msg_id = NOTIFICATION.msg_id) and destr_timestamp < msg_timestamp ";
+											esql.executeUpdate(interval);
+
 
                                             //TODO: BEFORE OUTPUTTING OPTIONS, PRINT MESSAGES IN CHRONOLOGICAL ORDER BASED ON CREATION DATE
 											List<List<String>> messages = cMessage(esql, au, cDepth, chats.get(cnum));
@@ -979,7 +984,7 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 			}
 			Timestamp tsd = null;
 
-			if(ans2.equals('y'))
+			if(ans2.equals("y"))
 			{
 				System.out.println("How many milliseconds? (1hr:3,600,000) (min:60,000) (seconds:1000) :");
 				long mil = readChoice();
@@ -1001,6 +1006,11 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 				// TODO Temp fix need to come back 
 				tsd = new Timestamp((long) 111111111); 
 			}
+			else
+			{
+				tsd = new Timestamp(ts.getTime() + tsd.getTime());
+			}
+
 			String mm = String.format("insert into Message( msg_text, msg_timestamp, destr_timestamp,sender_login,chat_id) Values( '%s', '%s', '%s', '%s', %s)", msg, ts, tsd, au.login, hit); 
        		esql.executeUpdate(mm);
 			int m_id = esql.getCurrSeqVal("message_msg_id_seq");
@@ -1039,6 +1049,117 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 	    	System.err.println(e.getMessage());
     	}
    }//end temp
+
+public static void EditMessage(Messenger esql, aUser au, List<String> message)
+
+{
+    try{
+        String m_id = message.get(0);
+        //query for the author of message and the au
+        String query = String.format("SELECT sender_login FROM MESSAGE WHERE msg_id = '%s' AND sender_login = '%s'", m_id, au.login);   
+        int rows = esql.executeQuery(query);
+        if(rows == 0)
+        {
+            System.out.println("Error: Message doesn't exist or does not belong to the authorized user!");
+            return;
+        }
+        else
+        {
+                //edit the text field of a message
+                System.out.println("EDIT YOUR OLD MESSAGE");
+                System.out.println("Text: " );
+                String input = in.readLine();
+                System.out.println("FINISHED READING INPUT");
+                String update = String.format("UPDATE MESSAGE SET msg_text = '%s' WHERE msg_id = '%s' AND sender_login = '%s'", input, m_id, au.login);
+                esql.executeUpdate(update);
+               
+                //check if original message has any attachments
+                String query1 = String.format("SELECT * FROM MEDIA_ATTACHMENT WHERE msg_id = '%s'", m_id);
+                List<List<String>> media_ids = esql.executeQueryResult(query1);
+                int rows1 = media_ids.size();
+                String ans;
+                if(rows1 == 0)
+                {
+                    System.out.print("Do you want to add attachments? (y/n): ");
+                    ans = in.readLine();
+                    while(!ans.equals("y") && !ans.equals("n"))
+                    {
+                        System.out.print("Error: Invalid response. (y/n): ");
+                        ans = in.readLine();
+                    }
+                    if(ans.equals("y"))
+                    {
+                        boolean exit = false;
+                        while(!exit)
+                        {
+                            System.out.print("Enter the media type: ");
+                            String get_type = in.readLine();
+                            System.out.print("\nEnter the URL: ");
+                            String get_URL = in.readLine();
+                            String update1 = String.format("INSERT INTO MEDIA_ATTACHMENT(media_type, URL, msg_id) VALUES('%s', '%s', '%s');", get_type, get_URL, m_id);
+                            esql.executeUpdate(update1);
+                           
+                            System.out.print("Do you want to continue to add more attachments? (y/n): ");
+                            ans = in.readLine();
+                            while(!ans.equals("y") && !ans.equals("n"))
+                            {
+                                System.out.print("Error: Invalid response. (y/n): ");
+                                ans = in.readLine();
+                            }
+                            if(ans.equals("n"))
+                            {
+                                exit = true;
+                            }
+                        }
+                    }
+                    System.out.println("\t\tYou have edited a messaged!\n");
+                }
+                else
+                {
+                    // If there are already attchments you must make them choose and use the media_id to update
+                    System.out.println("There are existing attachments to the message.");
+                    System.out.println("Do you want to modify them? (y/n)");
+                    ans = in.readLine();
+                    while(!ans.equals("y") && !ans.equals("n"))
+                    {
+                        System.out.print("Error: Invalid response. (y/n): ");
+                        ans = in.readLine();
+                    }
+                    System.out.println("Which media attachments do you want to modify?");
+                    for(int i = 0; i < rows1; ++i)
+                    {  
+                        int temp = i + 1;
+                        System.out.print(temp + ") ");
+                        System.out.println("\t\t" + media_ids.get(i).get(0));
+                    }
+                   
+                    ArrayList<String> media_to_modify = new ArrayList<String>();
+                    ArrayList<List<String>> modify_media = new ArrayList<List<String>>();
+                    System.out.println("Choose all media_ids that you want to modify (press '0' when finished)");
+                    boolean exit = false;
+                    int choice = -1;
+                    while(!exit)
+                    {
+                        choice = readChoice();
+                        if(choice == 0)
+                        {
+                            exit = true;
+                        }
+                        else{
+                            System.out.print("Enter a media type: ");
+                            String type = in.readLine();
+                            System.out.print("\nEnter a URL: ");
+                            String URL = in.readLine();
+                            String update2 = String.format("UPDATE MEDIA_ATTACHMENT SET media_type = '%s', URL = '%s', msg_id = '%s' WHERE media_id = '%s'", type, URL, media_ids.get(choice -1).get(3), media_ids.get(choice - 1).get(0));
+                            esql.executeUpdate(update2);
+                        }
+                    }
+                }
+        }
+    } catch(Exception e){
+        System.err.println(e.getMessage());
+    }
+}
 
  public static int dProfile(Messenger esql, aUser au){
         try{
@@ -1283,7 +1404,10 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 				// TODO Temp fix need to come back 
 				tsd = new Timestamp((long) 11111111); 
 			}
-			System.out.println("wtf");
+			else
+			{
+				tsd = new Timestamp(ts.getTime() + tsd.getTime());
+			}
 			String mm = String.format("insert into Message( msg_text, msg_timestamp, destr_timestamp,sender_login,chat_id) Values( '%s', '%s', '%s', '%s', %s);", msg, ts, tsd, au.login, hit);
 			System.out.println(mm); 
        		esql.executeUpdate(mm);
@@ -1345,55 +1469,6 @@ public static void DeleteMessage(Messenger esql, aUser au, List<String> message)
 
     }
 
-public static void EditMessage(Messenger esql, aUser au, List<String> message)
-{
-    try{
-        String m_id = message.get(0);
-        //query for the author of message and the au
-        String query = String.format("SELECT sender_login FROM MESSAGE WHERE msg_id = '%s' AND sender_login = '%s'", m_id, au.login);    
-        int rows = esql.executeQuery(query);
-        if(rows == 0)
-        {
-            System.out.println("Error: Message doesn't exist or does not belong to the authorized user!");
-            return;
-        }
-        else
-        {
-             /* 
-                System.out.println("ORIGINAL MESSAGE");
-				//System.out.println( + ")");
-				System.out.println("Author: " + message.get(4));
-				System.out.println("Creation Date: " + message.get(2));
-				System.out.println("Text: " + message.get(1));
-				String att_look = String.format("select media_type, URL from MEDIA_ATTACHMENT where msg_id = '%s' ", chat_id.get(0));
-				List<List<String>> aQ = esql.executeQueryResult(att_look);
-                boolean go = 1;
-				if(aQ.size() == 0 || aQ == null)
-				{
-					go = 0;
-				}
-				for(int j = 0; j < aQ.size() && go == 1; j++)
-				{
-					System.out.print("Media type: ");
-					System.out.println(aQ.get(j).get(0));
-					System.out.print("URL :");
-					System.out.println(aQ.get(j).get(1));
-				}
-*/
-                System.out.println("EDIT YOUR OLD MESSAGE");
-                System.out.println("Text: " );
-                String input = in.readLine();
-                System.out.println("FINISHED READING INPUT");
-                String update = String.format("UPDATE MESSAGE SET msg_text = '%s' WHERE msg_id = '%s' AND sender_login = '%s'", input, m_id, au.login);
-                
-
-            esql.executeUpdate(update);
-            System.out.println("\t\tYou have edited a message!\n");
-        }
-    } catch(Exception e){
-        System.err.println(e.getMessage());
-    }
-}
 /*
 public static int NewMessageChat(Messenger esql, aUser au)
 {
