@@ -363,7 +363,7 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
                                         while(viewing_chat)
                                         {
 											//set delete interval
-											String interval = "DELETE FROM MESSAGE WHERE  not exists(select msg_id from NOTIFICATION where MESSAGE.msg_id = NOTIFICATION.msg_id) and destr_timestamp < msg_timestamp ";
+											String interval = "DELETE FROM MESSAGE WHERE msg_id NOT IN (select msg_id from NOTIFICATION where MESSAGE.msg_id = NOTIFICATION.msg_id) and destr_timestamp <= now() ";
 											esql.executeUpdate(interval);
 
 
@@ -1029,6 +1029,15 @@ public List<List<String>> executeQueryResult (String query) throws SQLException 
 				System.out.println("Attachments are now added");
 			}
 
+			//notify
+			// add all
+				for(int x = 0; x < reciv.size(); x++)
+				{
+					String adda = String.format("insert into NOTIFICATION(user_login, msg_id) values('%s', '%s')", m_id, reciv.get(x));
+					esql.executeUpdate(adda);
+					System.out.println("new chat_list made");
+				}
+
 
 			return;
 
@@ -1426,6 +1435,15 @@ public static void EditMessage(Messenger esql, aUser au, List<String> message)
 			{
 				System.out.println("Attachments are now added");
 			}
+			
+			//notify
+			// add all
+				for(int x = 0; x < reciv.size(); x++)
+				{
+					String adda = String.format("insert into NOTIFICATION(user_login, msg_id) values('%s', '%s')", m_id, reciv.get(x));
+					esql.executeUpdate(adda);
+					System.out.println("new chat_list made");
+				}
 
 
 			return;
